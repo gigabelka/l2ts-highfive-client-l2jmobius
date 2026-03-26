@@ -1,0 +1,447 @@
+{
+  "Artisan": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Assassin": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Cleric": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "DarkWizard": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "ElvenKnight": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "ElvenOracle": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "ElvenScout": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "ElvenWizard": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "HumanKnight": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "HumanWizard": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "OrcMonk": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "OrcRaider": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "OrcShaman": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "PalusKnight": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Rogue": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Scavenger": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "ShillienOracle": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Warrior": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "AbyssWalker": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Bishop": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Bladedancer": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "BountyHunter": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "DarkAvenger": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Destroyer": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "ElementalSummoner": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "ElvenElder": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Gladiator": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "HawkEye": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Necromancer": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Overlord": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Paladin": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "PhantomRanger": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "PhantomSummoner": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "PlainsWalker": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Prophet": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "ShillienElder": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "ShillienKnight": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "SilverRanger": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Sorcerer": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Spellhowler": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Spellsinger": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "SwordSinger": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "TempleKnight": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "TreasureHunter": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Tyrant": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Warcryer": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Warlock": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Warlord": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Warsmith": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Adventurer": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "ArcanaLord": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Archmage": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Cardinal": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Dominator": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Doomcryer": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Dreadnought": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Duelist": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "ElementalMaster": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Eva'sSaint": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Eva'sTemplar": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "FortuneSeeker": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "GhostHunter": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "GhostSentinel": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "GrandKhavatari": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "HellKnight": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Hierophant": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Maestro": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "MoonlightSentinel": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "MysticMuse": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "PhoenixKnight": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Sagittarius": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "ShillienSaint": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "ShillienTemplar": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Soultaker": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "SpectralDancer": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "SpectralMaster": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "StormScreamer": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "SwordMuse": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "Titan": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "WindRider": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "DarkFighter": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "DarkMystic": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "DwarvenFighter": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "ElvenFighter": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "ElvenMystic": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "HumanFighter": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "HumanMystic": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "OrcFighter": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  },
+  "OrcMystic": {
+    "stats": {},
+    "items": [],
+    "skills": []
+  }
+}

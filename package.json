@@ -1,0 +1,73 @@
+{
+  "name": "l2ts-highfive-client-l2jmobius",
+  "version": "0.4.50",
+  "description": "Headless Lineage 2 HighFive client for L2J Mobius servers",
+  "chronicle": "HighFive",
+  "protocols": [
+    267
+  ],
+  "author": "Viktor Belkin",
+  "license": "MIT",
+  "homepage": "https://github.com/gigabelka/l2ts-interlude-client-l2jmobius",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gigabelka/l2ts-interlude-client-l2jmobius"
+  },
+  "engines": {
+    "node": ">=24.14.0"
+  },
+  "scripts": {
+    "dev": "cross-env LOG_LEVEL=SILENT ts-node src/index.ts",
+    "debug": "cross-env LOG_LEVEL=DEBUG ts-node src/index.ts",
+    "build": "tsc && npm run copy:dashboard",
+    "copy:dashboard": "node scripts/copy-dashboard.js",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "commit": "node scripts/bump-version.js && git add -A && git commit",
+    "export:data": "node -e \"const fs=require('fs');if(!fs.existsSync('stats')){console.error('\\n❌ Ошибка: папка stats/ не найдена.');console.log('\\n📋 Перед запуском скопируйте папку data/stats из сервера L2J_Mobius:');console.log('   https://gitlab.com/MobiusDevelopment/L2J_Mobius/-/tree/master/L2J_Mobius_CT_0_Interlude');console.log('\\n   В корень проекта рядом с package.json.\\n');process.exit(1);}\" && node scripts/export-xml.js && node scripts/normalize-database.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.3.1",
+    "helmet": "^8.1.0",
+    "reflect-metadata": "^0.2.2",
+    "ws": "^8.19.0",
+    "xml2js": "^0.6.2",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/cors": "^2.8.19",
+    "@types/dotenv": "^6.1.1",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.15.42",
+    "@types/ws": "^8.18.1",
+    "@typescript-eslint/eslint-plugin": "^8.57.1",
+    "@typescript-eslint/parser": "^8.57.1",
+    "@vitest/coverage-v8": "^2.1.9",
+    "cross-env": "^10.1.0",
+    "globals": "^17.4.0",
+    "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.4"
+  },
+  "keywords": [
+    "lineage2",
+    "nodejs",
+    "typescript",
+    "packets",
+    "bot",
+    "l2j",
+    "highfive"
+  ]
+}

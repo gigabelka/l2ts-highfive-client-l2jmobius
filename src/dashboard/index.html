@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 L2 Bot Dashboard</title>
+    
+    <!-- Pico.css -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Dashboard Styles -->
+    <link rel="stylesheet" href="/css/dashboard.css?v=8">
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <header>
+            <nav>
+                <ul>
+                    <li><strong>🎮 L2 Bot Dashboard</strong></li>
+                </ul>
+                <ul>
+                    <li><a href="#" class="nav-link active" data-tab="dashboard">Dashboard</a></li>
+                    <li><a href="#" class="nav-link" data-tab="skills">Skills</a></li>
+                    <li><a href="#" class="nav-link" data-tab="inventory">Inventory</a></li>
+                    <li><a href="#" class="nav-link" data-tab="ws-monitor">WS Monitor</a></li>
+
+                </ul>
+                <ul>
+                    <li>
+                        <span id="connection-status" class="status-badge">
+                            <i data-lucide="circle" class="status-icon"></i>
+                            <span>DISCONNECTED</span>
+                        </span>
+                    </li>
+                    <li><span id="ping-badge" class="ping-badge">-- ms</span></li>
+                </ul>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Dashboard Tab -->
+            <section id="tab-dashboard" class="tab-content active">
+                <div class="dashboard-layout">
+                    <!-- Full Width Dashboard -->
+                    <div class="dashboard-content">
+                        <!-- Top Row: Character, Quick Actions, Target, Movement -->
+                        <div class="dashboard-top-row">
+                        <!-- Character Status Panel -->
+                        <article class="panel">
+                            <header>
+                                <h3><i data-lucide="user"></i> Character</h3>
+                            </header>
+                            <div id="character-info">
+                                <div class="character-header">
+                                    <div class="avatar-placeholder">
+                                        <i data-lucide="user-circle" class="avatar-icon"></i>
+                                    </div>
+                                    <div class="character-meta">
+                                        <h4 id="char-name">--</h4>
+                                        <p id="char-class">--</p>
+                                        <p id="char-level">Level --</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="stats-bars">
+                                    <div class="stat-bar">
+                                        <label>HP <span id="hp-value">--/--</span></label>
+                                        <progress id="hp-bar" value="0" max="100"></progress>
+                                    </div>
+                                    <div class="stat-bar">
+                                        <label>MP <span id="mp-value">--/--</span></label>
+                                        <progress id="mp-bar" value="0" max="100"></progress>
+                                    </div>
+                                    <div class="stat-bar">
+                                        <label>CP <span id="cp-value">--/--</span></label>
+                                        <progress id="cp-bar" value="0" max="100"></progress>
+                                    </div>
+                                    <div class="stat-bar">
+                                        <label>XP <span id="xp-value">--%</span></label>
+                                        <progress id="xp-bar" value="0" max="100"></progress>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+
+                        <!-- Quick Actions -->
+                        <article class="panel">
+                            <header>
+                                <h3><i data-lucide="zap"></i> Quick Actions</h3>
+                            </header>
+                            <div class="quick-actions">
+                                <button id="btn-attack" class="action-btn" disabled>
+                                    <i data-lucide="sword"></i> Attack
+                                </button>
+                                <button id="btn-next-target" class="action-btn" disabled>
+                                    <i data-lucide="scan-eye"></i> Next Target
+                                </button>
+                                <button id="btn-pickup" class="action-btn" disabled>
+                                    <i data-lucide="hand"></i> Pickup
+                                </button>
+                                <button id="btn-sit" class="action-btn" disabled>
+                                    <i data-lucide="armchair"></i> Sit/Stand
+                                </button>
+                                <button id="btn-chat" class="action-btn" disabled>
+                                    <i data-lucide="message-square"></i> Chat
+                                </button>
+                                <button id="btn-toggle-connect" class="action-btn">
+                                    <i data-lucide="log-in"></i> Connect
+                                </button>
+                            </div>
+                        </article>
+
+                                                <!-- Target Info -->
+                        <article class="panel">
+                            <header>
+                                <h3><i data-lucide="target"></i> Target</h3>
+                            </header>
+                            <div id="target-info">
+                                <div class="target-empty">
+                                    <i data-lucide="crosshair"></i>
+                                    <p>No target selected</p>
+                                </div>
+                                <div id="target-details" class="target-details hidden">
+                                    <div class="target-header">
+                                        <h4 id="target-name">--</h4>
+                                        <span id="target-type" class="badge">--</span>
+                                    </div>
+                                    <p id="target-level">Level --</p>
+                                    <div class="stat-bar">
+                                        <label>HP <span id="target-hp-value">--/--</span></label>
+                                        <progress id="target-hp-bar" value="0" max="100"></progress>
+                                    </div>
+                                    <p id="target-distance">Distance: --m</p>
+                                    <div class="target-actions">
+                                        <button id="btn-target-attack" class="small">
+                                            <i data-lucide="sword"></i> Attack
+                                        </button>
+                                        <button id="btn-target-skill" class="small secondary">
+                                            <i data-lucide="sparkles"></i> Skill
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+
+                        <!-- Movement Controls -->
+                        <article class="panel movement-panel">
+                            <header>
+                                <h3><i data-lucide="move"></i> Movement</h3>
+                            </header>
+                            <div class="movement-controls">
+                                <div class="movement-dpad">
+                                    <button id="btn-move-forward" class="movement-btn" disabled title="Вперёд (W)">
+                                        <i data-lucide="arrow-up"></i>
+                                    </button>
+                                    <div class="movement-middle-row">
+                                        <button id="btn-move-left" class="movement-btn" disabled title="Влево (A)">
+                                            <i data-lucide="arrow-left"></i>
+                                        </button>
+                                        <button id="btn-move-stop" class="movement-btn secondary" disabled title="Остановиться (S)">
+                                            <i data-lucide="octagon"></i>
+                                        </button>
+                                        <button id="btn-move-right" class="movement-btn" disabled title="Вправо (D)">
+                                            <i data-lucide="arrow-right"></i>
+                                        </button>
+                                    </div>
+                                    <button id="btn-move-backward" class="movement-btn" disabled title="Назад (X)">
+                                        <i data-lucide="arrow-down"></i>
+                                    </button>
+                                </div>
+                                <div class="coords">
+                                    <span>X: <code id="pos-x">--</code></span>
+                                    <span>Y: <code id="pos-y">--</code></span>
+                                    <span>Z: <code id="pos-z">--</code></span>
+                                </div>
+                                <div class="movement-info">
+                                    <label class="movement-step-label">
+                                        <span>Step:</span>
+                                        <input type="range" id="movement-step" min="50" max="500" value="100" step="50">
+                                        <span id="movement-step-value">100</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </article>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+
+            <!-- Inventory Tab -->
+            <section id="tab-inventory" class="tab-content">
+                <article class="panel">
+                    <header>
+                        <h3><i data-lucide="package"></i> Inventory</h3>
+                        <div class="header-actions">
+                            <select id="inventory-filter">
+                                <option value="all">All Items</option>
+                                <option value="weapon">Weapons</option>
+                                <option value="armor">Armor</option>
+                                <option value="consumable">Consumables</option>
+                                <option value="material">Materials</option>
+                                <option value="equipped">Equipped</option>
+                            </select>
+                            <span id="adena-amount" class="adena-badge">
+                                <i data-lucide="coins"></i> <span>--</span> Adena
+                            </span>
+                        </div>
+                    </header>
+                    <div id="inventory-grid" class="inventory-grid">
+                        <div class="inventory-empty">
+                            <i data-lucide="package-x"></i>
+                            <p>Inventory not loaded</p>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <!-- Skills Tab -->
+            <section id="tab-skills" class="tab-content">
+                <div class="grid">
+                    <!-- Active Skills -->
+                    <article class="panel skills-panel">
+                        <header>
+                            <h3><i data-lucide="zap"></i> Active Skills</h3>
+                            <span id="active-skills-count" class="badge">0</span>
+                        </header>
+                        <div id="active-skills-list" class="skills-list-container">
+                            <div class="skills-empty">
+                                <i data-lucide="zap-off"></i>
+                                <p>No active skills loaded</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Passive Skills -->
+                    <article class="panel skills-panel">
+                        <header>
+                            <h3><i data-lucide="shield"></i> Passive Skills</h3>
+                            <span id="passive-skills-count" class="badge">0</span>
+                        </header>
+                        <div id="passive-skills-list" class="skills-list-container">
+                            <div class="skills-empty">
+                                <i data-lucide="shield-off"></i>
+                                <p>No passive skills loaded</p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+                <!-- Skill Details Panel -->
+                <article class="panel">
+                    <header>
+                        <h3><i data-lucide="info"></i> Skill Details</h3>
+                    </header>
+                    <div id="skill-details" class="skill-details-empty">
+                        <p>Select a skill to view details</p>
+                    </div>
+                </article>
+            </section>
+
+            <!-- WebSocket Monitor Tab -->
+            <section id="tab-ws-monitor" class="tab-content">
+                <div class="packet-console">
+                    <!-- Top Panel - Filters -->
+                    <div class="packet-console-header">
+                        <div class="packet-filter-group">
+                            <label for="packet-filter">Filter</label>
+                            <input type="text" id="packet-filter" placeholder="e.g. IN_GAME CharInfo or !Ping" autocomplete="off">
+                        </div>
+                        <div class="packet-filter-group">
+                            <label for="packet-direction">Direction</label>
+                            <select id="packet-direction">
+                                <option value="all">All</option>
+                                <option value="in">Server→Client</option>
+                                <option value="out">Client→Server</option>
+                            </select>
+                        </div>
+                        <div class="packet-console-actions">
+                            <button id="packet-pause-btn" class="secondary small">
+                                <i data-lucide="pause"></i> <span>Pause</span>
+                            </button>
+                            <button id="packet-clear-btn" class="secondary small">
+                                <i data-lucide="trash-2"></i> Clear
+                            </button>
+                            <label class="packet-autoscroll-label">
+                                <input type="checkbox" id="packet-autoscroll" checked>
+                                <span>Auto-scroll</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Main Console Area -->
+                    <div id="packet-log" class="packet-log">
+                        <div class="packet-log-empty">
+                            <i data-lucide="terminal"></i>
+                            <p>Packet console ready. Waiting for WebSocket messages...</p>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Status Bar -->
+                    <div class="packet-console-footer">
+                        <div class="packet-status">
+                            <span id="packet-ws-status" class="packet-status-badge disconnected">Disconnected</span>
+                        </div>
+                        <div class="packet-stats">
+                            <span id="packet-showing-count">Showing: 0 / Total: 0</span>
+                            <span id="packet-rate">0 pkt/s</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <small>
+                L2 Bot Dashboard • REST API: <code>localhost:3000/api/v1</code> • 
+                WebSocket: <code>ws://localhost:3000/ws</code>
+            </small>
+        </footer>
+    </div>
+
+    <!-- JavaScript Modules -->
+    <script src="/js/utils/formatters.js"></script>
+    <script src="/js/api-client.js"></script>
+    <script src="/js/ws-client.js"></script>
+    <script src="/js/components/status-panel.js"></script>
+    <script src="/js/components/skills-panel.js"></script>
+    <script src="/js/components/inventory-panel.js"></script>
+    <script src="/js/components/packet-console.js"></script>
+    <script src="/js/utils/npc-database.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>

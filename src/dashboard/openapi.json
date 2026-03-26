@@ -1,0 +1,938 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "L2 Bot API",
+    "description": "REST API для управления Lineage 2 бот-клиентом",
+    "version": "1.0.0",
+    "contact": {
+      "name": "L2 Bot Support"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api/v1",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/status": {
+      "get": {
+        "summary": "Get connection status",
+        "description": "Returns current connection status to game servers",
+        "operationId": "getStatus",
+        "responses": {
+          "200": {
+            "description": "Status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connect": {
+      "post": {
+        "summary": "Connect to game server",
+        "description": "Initiates connection to L2 game server",
+        "operationId": "connect",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Connection initiated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/disconnect": {
+      "post": {
+        "summary": "Disconnect from game server",
+        "description": "Gracefully disconnects from game server",
+        "operationId": "disconnect",
+        "responses": {
+          "200": {
+            "description": "Disconnected successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/character": {
+      "get": {
+        "summary": "Get character info",
+        "description": "Returns full character information including stats, position, buffs",
+        "operationId": "getCharacter",
+        "responses": {
+          "200": {
+            "description": "Character info retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/character/stats": {
+      "get": {
+        "summary": "Get character stats",
+        "description": "Returns combat statistics only",
+        "operationId": "getCharacterStats",
+        "responses": {
+          "200": {
+            "description": "Stats retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/character/buffs": {
+      "get": {
+        "summary": "Get active buffs",
+        "description": "Returns list of active buffs and debuffs",
+        "operationId": "getBuffs",
+        "responses": {
+          "200": {
+            "description": "Buffs retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuffsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inventory": {
+      "get": {
+        "summary": "Get inventory",
+        "description": "Returns character inventory with all items",
+        "operationId": "getInventory",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["weapon", "armor", "consumable", "material", "quest", "etc"]
+            },
+            "description": "Filter by item type"
+          },
+          {
+            "name": "equipped",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Show only equipped items"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Inventory retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inventory/use": {
+      "post": {
+        "summary": "Use item",
+        "description": "Uses a consumable item from inventory",
+        "operationId": "useItem",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UseItemRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item used"
+          }
+        }
+      }
+    },
+    "/target": {
+      "get": {
+        "summary": "Get current target",
+        "description": "Returns information about current target",
+        "operationId": "getTarget",
+        "responses": {
+          "200": {
+            "description": "Target info retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TargetResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/target/set": {
+      "post": {
+        "summary": "Set target",
+        "description": "Sets target by object ID",
+        "operationId": "setTarget",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetTargetRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Target set"
+          }
+        }
+      }
+    },
+    "/target/clear": {
+      "post": {
+        "summary": "Clear target",
+        "description": "Removes current target",
+        "operationId": "clearTarget",
+        "responses": {
+          "200": {
+            "description": "Target cleared"
+          }
+        }
+      }
+    },
+    "/combat/attack": {
+      "post": {
+        "summary": "Attack target",
+        "description": "Attacks current or specified target",
+        "operationId": "attack",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttackRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Attack command sent"
+          }
+        }
+      }
+    },
+    "/combat/stop": {
+      "post": {
+        "summary": "Stop attack",
+        "description": "Stops auto-attack",
+        "operationId": "stopAttack",
+        "responses": {
+          "200": {
+            "description": "Attack stopped"
+          }
+        }
+      }
+    },
+    "/nearby/npcs": {
+      "get": {
+        "summary": "Get nearby NPCs",
+        "description": "Returns list of NPCs/mobs in visibility range",
+        "operationId": "getNearbyNpcs",
+        "parameters": [
+          {
+            "name": "radius",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 600
+            },
+            "description": "Search radius"
+          },
+          {
+            "name": "attackable",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Only attackable NPCs"
+          },
+          {
+            "name": "alive",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            },
+            "description": "Only alive NPCs"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "NPCs retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NearbyNpcsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/move/to": {
+      "post": {
+        "summary": "Move to coordinates",
+        "description": "Moves character to specified coordinates",
+        "operationId": "moveTo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveToRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Move command sent"
+          }
+        }
+      }
+    },
+    "/move/stop": {
+      "post": {
+        "summary": "Stop movement",
+        "description": "Stops character movement",
+        "operationId": "stopMove",
+        "responses": {
+          "200": {
+            "description": "Movement stopped"
+          }
+        }
+      }
+    },
+    "/chat/send": {
+      "post": {
+        "summary": "Send chat message",
+        "description": "Sends a message to specified chat channel",
+        "operationId": "sendChat",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendChatRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Message sent"
+          }
+        }
+      }
+    },
+    "/skills": {
+      "get": {
+        "summary": "Get skills",
+        "description": "Returns list of character skills",
+        "operationId": "getSkills",
+        "responses": {
+          "200": {
+            "description": "Skills retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkillsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/skills/use": {
+      "post": {
+        "summary": "Use skill",
+        "description": "Uses a skill on target",
+        "operationId": "useSkill",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UseSkillRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Skill used"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "StatusResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "phase": {
+                "type": "string",
+                "enum": ["DISCONNECTED", "LOGIN_CONNECTING", "LOGIN_AUTHENTICATING", "SELECTING_CHARACTER", "ENTERING_GAME", "IN_GAME", "ERROR"]
+              },
+              "loginServer": {
+                "type": "object",
+                "properties": {
+                  "connected": {
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "type": "string"
+                  },
+                  "port": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "gameServer": {
+                "type": "object",
+                "properties": {
+                  "connected": {
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "type": "string"
+                  },
+                  "port": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "uptime": {
+                "type": "integer",
+                "description": "Uptime in seconds"
+              },
+              "pingMs": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "CharacterResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "objectId": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "classId": {
+                "type": "integer"
+              },
+              "className": {
+                "type": "string"
+              },
+              "level": {
+                "type": "integer"
+              },
+              "race": {
+                "type": "string"
+              },
+              "sex": {
+                "type": "string"
+              },
+              "hp": {
+                "type": "object",
+                "properties": {
+                  "current": {
+                    "type": "integer"
+                  },
+                  "max": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "mp": {
+                "type": "object",
+                "properties": {
+                  "current": {
+                    "type": "integer"
+                  },
+                  "max": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "cp": {
+                "type": "object",
+                "properties": {
+                  "current": {
+                    "type": "integer"
+                  },
+                  "max": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "exp": {
+                "type": "integer"
+              },
+              "expPercent": {
+                "type": "number"
+              },
+              "sp": {
+                "type": "integer"
+              },
+              "position": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "integer"
+                  },
+                  "y": {
+                    "type": "integer"
+                  },
+                  "z": {
+                    "type": "integer"
+                  },
+                  "heading": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "stats": {
+                "type": "object",
+                "properties": {
+                  "str": {
+                    "type": "integer"
+                  },
+                  "con": {
+                    "type": "integer"
+                  },
+                  "dex": {
+                    "type": "integer"
+                  },
+                  "int": {
+                    "type": "integer"
+                  },
+                  "wit": {
+                    "type": "integer"
+                  },
+                  "men": {
+                    "type": "integer"
+                  },
+                  "pAtk": {
+                    "type": "integer"
+                  },
+                  "mAtk": {
+                    "type": "integer"
+                  },
+                  "pDef": {
+                    "type": "integer"
+                  },
+                  "mDef": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ConnectRequest": {
+        "type": "object",
+        "properties": {
+          "overrideConfig": {
+            "type": "object",
+            "properties": {
+              "host": {
+                "type": "string"
+              },
+              "loginPort": {
+                "type": "integer"
+              },
+              "login": {
+                "type": "string"
+              },
+              "password": {
+                "type": "string"
+              },
+              "characterSlot": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          }
+        }
+      },
+      "StatsResponse": {
+        "type": "object"
+      },
+      "BuffsResponse": {
+        "type": "object",
+        "properties": {
+          "buffs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "skillId": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "level": {
+                  "type": "integer"
+                },
+                "remainingTime": {
+                  "type": "integer"
+                },
+                "isDebuff": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "debuffs": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "InventoryResponse": {
+        "type": "object",
+        "properties": {
+          "adena": {
+            "type": "integer"
+          },
+          "weight": {
+            "type": "object",
+            "properties": {
+              "current": {
+                "type": "integer"
+              },
+              "max": {
+                "type": "integer"
+              }
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "objectId": {
+                  "type": "integer"
+                },
+                "itemId": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "integer"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "equipped": {
+                  "type": "boolean"
+                },
+                "enchant": {
+                  "type": "integer"
+                },
+                "grade": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "UseItemRequest": {
+        "type": "object",
+        "properties": {
+          "objectId": {
+            "type": "integer"
+          }
+        },
+        "required": ["objectId"]
+      },
+      "TargetResponse": {
+        "type": "object",
+        "properties": {
+          "objectId": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["NPC", "PLAYER", "ITEM"]
+          },
+          "npcId": {
+            "type": "integer"
+          },
+          "level": {
+            "type": "integer"
+          },
+          "hp": {
+            "type": "object",
+            "properties": {
+              "current": {
+                "type": "integer"
+              },
+              "max": {
+                "type": "integer"
+              }
+            }
+          },
+          "isAttackable": {
+            "type": "boolean"
+          },
+          "isAggressive": {
+            "type": "boolean"
+          },
+          "distance": {
+            "type": "number"
+          },
+          "position": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "integer"
+              },
+              "y": {
+                "type": "integer"
+              },
+              "z": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "SetTargetRequest": {
+        "type": "object",
+        "properties": {
+          "objectId": {
+            "type": "integer"
+          }
+        },
+        "required": ["objectId"]
+      },
+      "AttackRequest": {
+        "type": "object",
+        "properties": {
+          "objectId": {
+            "type": "integer"
+          },
+          "shiftClick": {
+            "type": "boolean"
+          }
+        }
+      },
+      "NearbyNpcsResponse": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer"
+          },
+          "npcs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TargetResponse"
+            }
+          }
+        }
+      },
+      "MoveToRequest": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "integer"
+          },
+          "y": {
+            "type": "integer"
+          },
+          "z": {
+            "type": "integer"
+          },
+          "validateRange": {
+            "type": "boolean"
+          }
+        },
+        "required": ["x", "y", "z"]
+      },
+      "SendChatRequest": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "enum": ["ALL", "SHOUT", "TELL", "PARTY", "CLAN", "TRADE", "HERO"]
+          },
+          "message": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string",
+            "description": "Required for TELL channel"
+          }
+        },
+        "required": ["channel", "message"]
+      },
+      "SkillsResponse": {
+        "type": "object",
+        "properties": {
+          "skills": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "skillId": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "level": {
+                  "type": "integer"
+                },
+                "isActive": {
+                  "type": "boolean"
+                },
+                "isPassive": {
+                  "type": "boolean"
+                },
+                "isToggle": {
+                  "type": "boolean"
+                },
+                "cooldownMs": {
+                  "type": "integer"
+                },
+                "mpCost": {
+                  "type": "integer"
+                },
+                "castTimeMs": {
+                  "type": "integer"
+                },
+                "range": {
+                  "type": "integer"
+                },
+                "isReady": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      },
+      "UseSkillRequest": {
+        "type": "object",
+        "properties": {
+          "skillId": {
+            "type": "integer"
+          },
+          "level": {
+            "type": "integer"
+          },
+          "targetObjectId": {
+            "type": "integer"
+          },
+          "ctrlPressed": {
+            "type": "boolean"
+          },
+          "shiftPressed": {
+            "type": "boolean"
+          }
+        },
+        "required": ["skillId", "level"]
+      }
+    }
+  }
+}
