@@ -101,18 +101,24 @@ export class GameCrypt {
 
     /**
      * Encrypt outgoing packet body.
-     * First packet after CryptInit is NOT encrypted!
+     * First packet after CryptInit is NOT encrypted (only for CT_0_Interlude)!
      */
     encrypt(data: Buffer): Buffer {
         if (!this.enabled) {
             return data;
         }
 
-        // First packet after CryptInit is UNENCRYPTED!
-        if (this.firstPacket) {
-            Logger.info('GameCrypt', 'First packet - SKIPPING encryption');
+        // First packet after CryptInit is UNENCRYPTED only for CT_0_Interlude!
+        // For HighFive (protocol 267), first packet MUST be encrypted
+        if (this.firstPacket && !this.isStandardCrypt) {
+            Logger.info('GameCrypt', 'First packet - SKIPPING encryption (CT_0 only)');
             this.firstPacket = false;
             return data;
+        }
+        
+        // Clear first packet flag for HighFive after encryption
+        if (this.firstPacket) {
+            this.firstPacket = false;
         }
 
         const result = Buffer.from(data);

@@ -7,7 +7,7 @@ import { CONFIG } from '../../../config';
  * CharacterSelect — select a character by slot index.
  *
  * OpCode: 0x0D for CT_0_Interlude (L2J Mobius specific + 14 bytes padding)
- *         0x36 for HighFive (standard L2 CharacterSelect)
+ *         0x12 for HighFive (L2J Mobius CT 2.6 - see ClientPackets.java)
  *
  * Format: slot index (4 bytes, LE) + optional padding
  */
@@ -22,8 +22,8 @@ export class CharacterSelected implements OutgoingGamePacket {
         const w = new PacketWriter();
 
         // Use different opcodes for different protocol versions
-        // CT_0_Interlude (746) uses 0x0D, HighFive (267) uses 0x36
-        const opcode = CONFIG.Protocol === 267 ? 0x36 : 0x0D;
+        // CT_0_Interlude (746) uses 0x0D, HighFive (267) uses 0x12 (L2J Mobius CT 2.6)
+        const opcode = CONFIG.Protocol === 267 ? 0x12 : 0x0D;
         w.writeUInt8(opcode);
         w.writeInt32LE(this.slotIndex);  // slot index (4 bytes, LE)
 

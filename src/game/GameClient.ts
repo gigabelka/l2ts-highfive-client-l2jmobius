@@ -26,6 +26,7 @@ import { ProtocolVersion } from './packets/outgoing/ProtocolVersion';
 import { CharacterSelected } from './packets/outgoing/CharacterSelected';
 import { AuthRequest } from './packets/outgoing/AuthRequest';
 import { RequestInventoryOpen } from './packets/outgoing/RequestInventoryOpen';
+import { EnterWorld } from './packets/outgoing/EnterWorld';
 import { OutgoingGamePacket } from './packets/outgoing/OutgoingGamePacket';
 
 // Services
@@ -176,17 +177,20 @@ export class GameClientNew implements IGameClient {
 
     private handlePacket(_packet: unknown, opcode: number): void {
         // Post-processing for state transitions
+        // UserInfo opcode: 0x32 for HighFive (267), 0x04 for CT_0_Interlude (746)
+        const userInfoOpcode = CONFIG.Protocol === 267 ? 0x32 : 0x04;
+        
         switch (this.state) {
             case GameClientState.WAIT_CHAR_SELECTED:
-                if (opcode === 0x04) {
-                    const expectedConfirmOpcode = CONFIG.Protocol === 267 ? '0x1D' : '0x15';
+                if (opcode === userInfoOpcode) {
+                    const expectedConfirmOpcode = CONFIG.Protocol === 267 ? '0x0B' : '0x15';
                     Logger.info('GameClient', `Server skipped CharSelected (${expectedConfirmOpcode}) confirmation. Transitioning to UserInfo.`);
                     this.handleCharSelected();
                     this.onUserInfoReceived(opcode);
                 }
                 break;
             case GameClientState.WAIT_USER_INFO:
-                if (opcode === 0x04) {
+                if (opcode === userInfoOpcode) {
                     this.onUserInfoReceived(opcode);
                 }
                 break;
@@ -247,8 +251,9 @@ export class GameClientNew implements IGameClient {
 
             case GameClientState.WAIT_CHAR_LIST: {
                 // Check expected opcodes based on protocol version
+                // L2J Mobius CT 2.6 HighFive uses 0x09 (CHARACTER_SELECTION_INFO from ServerPackets.java)
                 const expectedOpcodes = CONFIG.Protocol === 267
-                    ? [0xAE] // HighFive: CharSelectInfo (L2J Mobius CT_2.6)
+                    ? [0x09] // HighFive: CharSelectionInfo (L2J Mobius CT_2.6)
                     : [0x04, 0x13, 0x2C]; // CT_0_Interlude: CharSelectInfo
 
                 if (expectedOpcodes.includes(opcode)) {
@@ -264,14 +269,19 @@ export class GameClientNew implements IGameClient {
                     Logger.logState(this.state, GameClientState.WAIT_CHAR_SELECTED);
                     this.state = GameClientState.WAIT_CHAR_SELECTED;
                     this.publishConnectionState(ConnectionPhase.SELECTING_CHARACTER);
+                } else {
+                    // Log unexpected packets for debugging
+                    const expectedHex = expectedOpcodes.map(op => `0x${op.toString(16)}`).join(', ');
+                    Logger.warn('GameClient', `WAIT_CHAR_LIST: Unexpected opcode 0x${opcode.toString(16)}, expected: ${expectedHex}`);
                 }
                 return;
             }
 
             case GameClientState.WAIT_CHAR_SELECTED: {
                 // Check expected opcodes based on protocol version
+                // L2J Mobius CT 2.6 HighFive uses 0x0B (CHARACTER_SELECTED from ServerPackets.java)
                 const expectedOpcodes = CONFIG.Protocol === 267
-                    ? [0x1D] // HighFive: CharSelected
+                    ? [0x0B] // HighFive: CharSelected (L2J Mobius CT_2.6)
                     : [0x15]; // CT_0_Interlude: CharSelected
 
                 if (expectedOpcodes.includes(opcode)) {
@@ -306,7 +316,6 @@ export class GameClientNew implements IGameClient {
         if (CONFIG.Protocol === 267) {
             // HighFive: Send single standard EnterWorld packet (0x11)
             Logger.info('GameClient', 'Sending HighFive EnterWorld (0x11)...');
-            const { EnterWorld } = require('./packets/outgoing/EnterWorld');
             this.sendPacket(new EnterWorld());
         } else {
             // CT_0_Interlude: Send special 3-packet sequence
@@ -442,10 +451,12 @@ export class GameClientNew implements IGameClient {
     }
 
     /**
-     * Обработка получения UserInfo (0x04)
+     * Обработка получения UserInfo (0x04 for CT_0, 0x32 for HighFive)
      */
     private onUserInfoReceived(opcode: number): void {
-        if (opcode !== 0x04) return;
+        // UserInfo opcode: 0x32 for HighFive (267), 0x04 for CT_0_Interlude (746)
+        const userInfoOpcode = CONFIG.Protocol === 267 ? 0x32 : 0x04;
+        if (opcode !== userInfoOpcode) return;
 
         // UserInfo received - character is now in game
         const char = this.deps.characterRepo.get();

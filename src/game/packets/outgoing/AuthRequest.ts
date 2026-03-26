@@ -36,8 +36,11 @@ export class AuthRequest implements OutgoingGamePacket {
         w.writeInt32LE(this.session.loginOkId1);
         w.writeInt32LE(this.session.loginOkId2);
 
-        // Language / Unknown constant (usually 1)
-        w.writeInt32LE(1);
+        // Language / Unknown constant (usually 1) - only for CT_0_Interlude
+        // HighFive protocol doesn't have this field
+        if (CONFIG.Protocol !== 267) {
+            w.writeInt32LE(1);
+        }
 
         const body = w.toBuffer();
         const protocolName = CONFIG.Protocol === 267 ? 'HighFive' : 'CT0_Mobius';

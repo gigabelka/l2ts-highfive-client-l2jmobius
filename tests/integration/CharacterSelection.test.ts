@@ -4,8 +4,13 @@ import { getContainer, resetContainer } from '../../src/config/di/appContainer';
 import { GameClientState } from '../../src/game/GameClientState';
 import { SessionData } from '../../src/login/types';
 import type { INetworkConnection } from '../../src/network/INetworkConnection';
+import { CONFIG } from '../../src/config';
 
 import { DI_TOKENS } from '../../src/config/di/Container';
+
+// Protocol-specific opcodes
+const CHAR_SELECT_INFO_OPCODE = CONFIG.Protocol === 267 ? 0x09 : 0x13;
+const CHAR_SELECTED_OPCODE = CONFIG.Protocol === 267 ? 0x0B : 0x15;
 
 /**
  * Mock network connection for testing
@@ -59,31 +64,31 @@ describe('GameClient Selection Flow', () => {
         gameClient = new GameClientNew(session, deps as any, mockConnection);
     });
 
-    it('should transition to WAIT_CHAR_SELECTED after receiving CharSelectInfo (0x13)', () => {
+    it(`should transition to WAIT_CHAR_SELECTED after receiving CharSelectInfo (0x${CHAR_SELECT_INFO_OPCODE.toString(16)})`, () => {
         // 1. Manually set state to WAIT_CHAR_LIST
         (gameClient as any).state = GameClientState.WAIT_CHAR_LIST;
 
-        // 2. Simulate receiving 0x13 (CharSelectInfo)
+        // 2. Simulate receiving CharSelectInfo (protocol-specific opcode)
         const charSelectInfo = Buffer.alloc(10);
-        charSelectInfo[0] = 0x13;
+        charSelectInfo[0] = CHAR_SELECT_INFO_OPCODE;
         charSelectInfo.writeUInt32LE(1, 1); // 1 character
         
         // This should trigger CharacterSelected and move to WAIT_CHAR_SELECTED
-        (gameClient as any).handleHandshakePacket(0x13, charSelectInfo);
+        (gameClient as any).handleHandshakePacket(CHAR_SELECT_INFO_OPCODE, charSelectInfo);
         
         expect((gameClient as any).state).toBe(GameClientState.WAIT_CHAR_SELECTED);
     });
 
-    it('should transition to WAIT_USER_INFO after receiving CharSelected (0x15)', () => {
+    it(`should transition to WAIT_USER_INFO after receiving CharSelected (0x${CHAR_SELECTED_OPCODE.toString(16)})`, () => {
         // 1. Manually set state to WAIT_CHAR_SELECTED (simulating previous step)
         (gameClient as any).state = GameClientState.WAIT_CHAR_SELECTED;
 
-        // 2. Simulate receiving 0x15 (CharSelected)
+        // 2. Simulate receiving CharSelected (protocol-specific opcode)
         const charSelected = Buffer.alloc(1);
-        charSelected[0] = 0x15;
+        charSelected[0] = CHAR_SELECTED_OPCODE;
         
         // This should trigger handleCharSelected and move to WAIT_USER_INFO
-        (gameClient as any).handleHandshakePacket(0x15, charSelected);
+        (gameClient as any).handleHandshakePacket(CHAR_SELECTED_OPCODE, charSelected);
         
         expect((gameClient as any).state).toBe(GameClientState.WAIT_USER_INFO);
     });
