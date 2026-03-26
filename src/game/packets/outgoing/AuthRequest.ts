@@ -21,8 +21,7 @@ export class AuthRequest implements OutgoingGamePacket {
     encode(): Buffer {
         const w = new PacketWriter();
 
-        // Use different opcodes for different protocol versions
-        // CT_0_Interlude (746) uses 0x08, HighFive (267) uses 0x2B (AuthLogin)
+        // 0x08 - AuthLogin opcode in CT_0_Interlude, 0x2B in HighFive
         const opcode = CONFIG.Protocol === 267 ? 0x2B : 0x08;
         w.writeUInt8(opcode);
 

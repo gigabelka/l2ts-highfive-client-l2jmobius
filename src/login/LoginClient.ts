@@ -275,11 +275,11 @@ export class LoginClientNew extends Connection {
         const reasons: Record<number, string> = {
             0x01: 'System error',
             0x02: 'Invalid password',
-            0x03: 'Account banned',
-            0x04: 'Account already in use',
-            0x05: 'Server maintenance',
-            0x06: 'Account expired',
-            0x07: 'Account restricted',
+            0x03: 'User or password wrong',
+            0x04: 'Access failed',
+            0x05: 'Invalid account info',
+            0x06: 'Access denied try later',
+            0x07: 'Account already in use',
         };
         return reasons[reason] || `Unknown reason: ${reason}`;
     }

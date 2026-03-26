@@ -248,7 +248,7 @@ export class GameClientNew implements IGameClient {
             case GameClientState.WAIT_CHAR_LIST: {
                 // Check expected opcodes based on protocol version
                 const expectedOpcodes = CONFIG.Protocol === 267
-                    ? [0x09] // HighFive: CharSelectionInfo
+                    ? [0xAE] // HighFive: CharSelectInfo (L2J Mobius CT_2.6)
                     : [0x04, 0x13, 0x2C]; // CT_0_Interlude: CharSelectInfo
 
                 if (expectedOpcodes.includes(opcode)) {

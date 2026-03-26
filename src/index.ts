@@ -237,8 +237,15 @@ async function main(): Promise<void> {
     process.on('SIGINT', () => shutdown(services));
     process.on('SIGTERM', () => shutdown(services));
     process.on('uncaughtException', (err) => {
-        Logger.error('Bootstrap', `Uncaught exception: ${err.message}`);
+        Logger.error('Bootstrap', `Uncaught exception: ${err.message}\n${err.stack}`);
         shutdown(services);
+    });
+    process.on('unhandledRejection', (reason, promise) => {
+        Logger.error('Bootstrap', `Unhandled Rejection at: ${promise}, reason: ${reason}`);
+        shutdown(services);
+    });
+    process.on('exit', (code) => {
+        Logger.info('Bootstrap', `Process is exiting with code: ${code}`);
     });
 
     // 6. Запуск подключения к игре (если включено)
