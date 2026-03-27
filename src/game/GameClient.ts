@@ -232,9 +232,9 @@ export class GameClientNew implements IGameClient {
                 const xorKeyData = body.subarray(2, 10);
                 const serverEncryptionFlag = body.readUInt32LE(10) !== 0;
 
-                // For HighFive (protocol 267), always enable encryption regardless of server flag
-                // For CT_0_Interlude (protocol 746), server sent flag=0 to disable encryption
-                const useEncryption = CONFIG.Protocol === 267 ? true : serverEncryptionFlag;
+                // Always use server encryption flag - L2J Mobius controls encryption per protocol
+                // L2J Mobius CT_2.6_HighFive sends flag=false to disable encryption
+                const useEncryption = serverEncryptionFlag;
 
                 // Initialize crypto
                 this.crypt.initKey(xorKeyData, useEncryption);

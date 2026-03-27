@@ -896,7 +896,7 @@ ws://localhost:3000/ws?token=your_api_key_here
 
 ---
 
-## WebSocket Vision API (Port 3001)
+## WebSocket Vision API (Port 3000)
 
 Standalone WebSocket сервер для трансляции GameState в реальном времени с оптимизациями производительности.
 
@@ -905,7 +905,7 @@ Standalone WebSocket сервер для трансляции GameState в ре�
 ```typescript
 export const WS_CONFIG = {
   enabled: true, // WS_ENABLED env
-  port: 3001, // WS_PORT env
+  port: 3000, // WS_PORT env
   authEnabled: false, // WS_AUTH_ENABLED env
   authTokens: [], // WS_AUTH_TOKENS env (comma-separated)
   maxClients: 10, // WS_MAX_CLIENTS env
@@ -914,7 +914,7 @@ export const WS_CONFIG = {
 };
 ```
 
-### HTTP Endpoints (порт 3001)
+### HTTP Endpoints (порт 3000)
 
 | Эндпоинт            | Метод | Описание                    |
 | ------------------- | ----- | --------------------------- |
@@ -972,13 +972,13 @@ export const WS_CONFIG = {
 **Node.js** (`examples/ws-client-node.js`):
 
 ```bash
-node examples/ws-client-node.js --host=localhost --port=3001 --channels='me,chat,combat'
+node examples/ws-client-node.js --host=localhost --port=3000 --channels='me,chat,combat'
 ```
 
 **Python** (`examples/ws-client-python.py`):
 
 ```bash
-python examples/ws-client-python.py --host=localhost --port=3001 --channels=me,chat,combat
+python examples/ws-client-python.py --host=localhost --port=3000 --channels=me,chat,combat
 ```
 
 ---

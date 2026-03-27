@@ -12,7 +12,7 @@ WebSocket Vision API Client for L2 Headless Client
     python examples/ws-client-python.py
 
 С опциями:
-    python examples/ws-client-python.py --host=192.168.1.100 --port=3001 --token=secret --channels=me,chat,combat
+    python examples/ws-client-python.py --host=192.168.1.100 --port=3000 --token=secret --channels=me,chat,combat
 """
 
 import asyncio
@@ -346,7 +346,7 @@ async def websocket_client(host: str, port: int, token: Optional[str], channels:
         print(f"{Colors.RED}❌ Connection refused:{Colors.RESET}")
         print(f"   Make sure the L2 client is running with WebSocket API enabled")
         print(f"   Check WS_ENABLED=true in .env")
-        print(f"   Default port: 3001")
+        print(f"   Default port: 3000")
     except websockets.exceptions.InvalidStatusCode as e:
         print(f"{Colors.RED}❌ Connection failed with status {e.status_code}{Colors.RESET}")
         if e.status_code == 401:
@@ -362,7 +362,7 @@ def main():
         epilog="""
 Examples:
   python ws-client-python.py
-  python ws-client-python.py --host=192.168.1.100 --port=3001
+  python ws-client-python.py --host=192.168.1.100 --port=3000
   python ws-client-python.py --token=secret123 --channels=me,chat,combat
   python ws-client-python.py --channels='*'
         """
@@ -376,8 +376,8 @@ Examples:
     parser.add_argument(
         '--port',
         type=int,
-        default=3001,
-        help='WebSocket server port (default: 3001)'
+        default=3000,
+        help='WebSocket server port (default: 3000)'
     )
     parser.add_argument(
         '--token',

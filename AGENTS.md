@@ -69,7 +69,7 @@ src/
 │   ├── middleware/             # Auth, rate limiting, request ID
 │   └── ws/WsServer.ts          # WebSocket server (shared mode)
 │
-├── ws/                         # Standalone WebSocket Vision API (порт 3001)
+├── ws/                         # Standalone WebSocket Vision API (порт 3000)
 │   ├── WsServer.ts             # WsApiServer с throttling/batching
 │   ├── HttpEndpoints.ts        # HTTP endpoints для снимков GameState
 │   └── auth.ts                 # Timing-safe аутентификация
@@ -203,9 +203,9 @@ API_PORT=3000
 LOG_LEVEL=ERROR      # DEBUG | INFO | WARN | ERROR | SILENT
 AUTO_CONNECT_GAME=true
 
-# WebSocket Vision API (Port 3001)
+# WebSocket Vision API (Port 3000)
 WS_ENABLED=true          # Enable standalone WebSocket API
-WS_PORT=3001             # Port for WebSocket server
+WS_PORT=3000             # Port for WebSocket server
 WS_AUTH_ENABLED=false    # Enable token authentication
 WS_AUTH_TOKENS=          # Comma-separated valid tokens
 WS_MAX_CLIENTS=10        # Maximum concurrent clients
@@ -339,14 +339,14 @@ if (result.isOk()) {
 - Combat commands: 5 req/s
 - General read: 100 req/s
 
-## WebSocket Vision API (Port 3001)
+## WebSocket Vision API (Port 3000)
 
 Standalone WebSocket API сервер для трансляции игрового состояния в реальном времени.
 
 **Конфигурация (.env):**
 ```bash
 WS_ENABLED=true          # Включить WebSocket API
-WS_PORT=3001             # Порт сервера
+WS_PORT=3000             # Порт сервера
 WS_AUTH_ENABLED=false    # Авторизация по токену
 WS_AUTH_TOKENS=          # Список токенов через запятую
 WS_MAX_CLIENTS=10        # Максимум клиентов
@@ -354,7 +354,7 @@ WS_BATCH_INTERVAL=50     # Интервал батчинга (мс)
 WS_MOVE_THROTTLE_MS=100  # Троттлинг движения (мс)
 ```
 
-**HTTP эндпоинты (порт 3001):**
+**HTTP эндпоинты (порт 3000):**
 - `GET /api/v1/snapshot` - Полный снимок GameState
 - `GET /api/v1/me` - Данные персонажа
 - `GET /api/v1/players` - Список игроков

@@ -111,17 +111,38 @@ function initWsApiServer(): void {
         const container = getContainer();
         const gameState = container.resolve<GameStateType>(DI_TOKENS.GameState).getOrThrow();
 
-        wsApiServer = new WsApiServer(gameState, {
-            port: WS_CONFIG.port,
-            authEnabled: WS_CONFIG.authEnabled,
-            authTokens: WS_CONFIG.authTokens,
-            maxClients: WS_CONFIG.maxClients,
-            batchInterval: WS_CONFIG.batchInterval,
-            moveThrottleMs: WS_CONFIG.moveThrottleMs,
-            debugAudit: WS_CONFIG.debugAudit,
-        });
+        // Try original port first, then fallback ports if EADDRINUSE
+        let port = WS_CONFIG.port;
+        let retries = 3;
 
-        Logger.info('Bootstrap', `✅ WebSocket API server started on port ${WS_CONFIG.port}`);
+        while (retries > 0) {
+            try {
+                wsApiServer = new WsApiServer(gameState, {
+                    port: port,
+                    authEnabled: WS_CONFIG.authEnabled,
+                    authTokens: WS_CONFIG.authTokens,
+                    maxClients: WS_CONFIG.maxClients,
+                    batchInterval: WS_CONFIG.batchInterval,
+                    moveThrottleMs: WS_CONFIG.moveThrottleMs,
+                    debugAudit: WS_CONFIG.debugAudit,
+                });
+
+                Logger.info('Bootstrap', `✅ WebSocket API server started on port ${port}`);
+                break;
+            } catch (innerError: unknown) {
+                if (innerError instanceof Error && (innerError as NodeJS.ErrnoException).code === 'EADDRINUSE') {
+                    Logger.warn('Bootstrap', `Port ${port} is busy, trying ${port + 1}...`);
+                    port++;
+                    retries--;
+                } else {
+                    throw innerError; // Re-throw non-port errors
+                }
+            }
+        }
+
+        if (retries === 0) {
+            Logger.error('Bootstrap', `Could not find available port starting from ${WS_CONFIG.port}`);
+        }
     } catch (error) {
         Logger.error('Bootstrap', `Failed to start WebSocket API: ${error}`);
     }

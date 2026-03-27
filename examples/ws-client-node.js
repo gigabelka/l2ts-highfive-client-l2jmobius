@@ -8,7 +8,7 @@
  *   node examples/ws-client-node.js
  * 
  * С опциями:
- *   node examples/ws-client-node.js --host=192.168.1.100 --port=3001 --token=secret
+ *   node examples/ws-client-node.js --host=192.168.1.100 --port=3000 --token=secret
  */
 
 const WebSocket = require("ws");
@@ -23,7 +23,7 @@ const args = process.argv.slice(2).reduce((acc, arg) => {
 }, {});
 
 const HOST = args.host || "localhost";
-const PORT = args.port || 3001;
+const PORT = args.port || 3000;
 const TOKEN = args.token || "";
 const CHANNELS = args.channels ? args.channels.split(',') : ['*'];
 

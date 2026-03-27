@@ -115,7 +115,7 @@ Domain events include:
 
 - **REST API** (port 3000): HTTP endpoints for character control, combat, movement, inventory
 - **WebSocket API** (port 3000/ws): Real-time game event streaming with channel-based subscriptions
-- **WebSocket Vision API** (port 3001): Standalone high-performance WebSocket server for GameState streaming
+- **WebSocket Vision API** (port 3000): Standalone high-performance WebSocket server for GameState streaming
 - **Dashboard**: Web UI for monitoring client state and manual control
 
 **CRITICAL:** The client strictly mimics the packet layout and padding observed in Wireshark captures to successfully connect.
@@ -265,7 +265,7 @@ Available subscription channels:
 - `party` - Party events
 - `inventory` - Inventory changes
 
-## WebSocket Vision API (Port 3001)
+## WebSocket Vision API (Port 3000)
 
 Standalone WebSocket server (`src/ws/WsServer.ts`) that streams GameState updates with optimizations:
 

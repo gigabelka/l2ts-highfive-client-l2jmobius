@@ -251,7 +251,7 @@ export type WsConfig = z.infer<typeof WsConfigSchema>;
 function validateWsConfig(): WsConfig {
   const rawConfig = {
     enabled: process.env["WS_ENABLED"] !== "false", // true by default
-    port: parseInt(process.env["WS_PORT"] || "3001", 10), // Default 3001 to avoid conflict with API
+    port: parseInt(process.env["WS_PORT"] || "3000", 10), // Default 3000
     authEnabled: process.env["WS_AUTH_ENABLED"] === "true",
     authTokens: process.env["WS_AUTH_TOKENS"]?.split(",").filter(Boolean) || [],
     maxClients: parseInt(process.env["WS_MAX_CLIENTS"] || "10", 10),
