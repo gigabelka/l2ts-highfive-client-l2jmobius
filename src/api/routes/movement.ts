@@ -6,6 +6,10 @@ import { getContainer } from '../../config/di/appContainer';
 import { DI_TOKENS } from '../../config/di/Container';
 import type { ICharacterRepository, IWorldRepository } from '../../domain/repositories';
 
+// Simple movement tracking
+let lastMoveCommand: { time: number; destination: { x: number; y: number; z: number } } | null = null;
+let movementStopped = false;
+
 
 const router = Router();
 
@@ -60,8 +64,11 @@ router.post('/to', moveRateLimitMiddleware, (req: Request, res: Response) => {
 
     // Send move command via GameCommandManager
     const success = GameCommandManager.moveTo(x, y, z);
-    
+
     if (success) {
+        // Track movement command
+        lastMoveCommand = { time: Date.now(), destination: { x, y, z } };
+        movementStopped = false;
         res.json({
             success: true,
             data: {
@@ -109,6 +116,8 @@ router.post('/stop', moveRateLimitMiddleware, (req: Request, res: Response) => {
     const success = GameCommandManager.stopMove();
 
     if (success) {
+        // Mark movement as stopped
+        movementStopped = true;
         Logger.info('MovementRoute', `Stop movement command sent at ${character!.position.x},${character!.position.y},${character!.position.z}`);
         res.json({
             success: true,
@@ -144,8 +153,27 @@ router.get('/status', (req: Request, res: Response) => {
     const isInGame = character !== null;
     const hasPosition = character?.position !== undefined && character?.position !== null;
     
-    // TODO: In future, track actual movement state when we have MoveToLocation packets
-    const isMoving = false;
+    // Basic movement tracking based on sent commands
+    let isMoving = false;
+    let destination: { x: number; y: number; z: number } | null = null;
+    let estimatedArrivalTime: number | null = null;
+
+    if (lastMoveCommand && !movementStopped && character?.position) {
+        const timeSinceMove = Date.now() - lastMoveCommand.time;
+        const dx = lastMoveCommand.destination.x - character.position.x;
+        const dy = lastMoveCommand.destination.y - character.position.y;
+        const dz = lastMoveCommand.destination.z - character.position.z;
+        const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        // Assume average movement speed ~120 units/second
+        const estimatedTravelTime = distance / 120 * 1000; // in milliseconds
+
+        if (timeSinceMove < estimatedTravelTime + 2000) { // +2 seconds buffer
+            isMoving = true;
+            destination = lastMoveCommand.destination;
+            estimatedArrivalTime = lastMoveCommand.time + estimatedTravelTime;
+        }
+    }
 
     res.json({
         success: true,
@@ -154,7 +182,13 @@ router.get('/status', (req: Request, res: Response) => {
             isInGame,
             hasPosition,
             position: character?.position?.toJSON() || null,
-            speed: character?.combatStats?.speed || 0
+            speed: character?.combatStats?.speed || 120, // Default L2 walking speed
+            destination,
+            estimatedArrivalTime: estimatedArrivalTime ? new Date(estimatedArrivalTime).toISOString() : null,
+            lastMoveCommand: lastMoveCommand ? {
+                time: new Date(lastMoveCommand.time).toISOString(),
+                destination: lastMoveCommand.destination
+            } : null
         },
         meta: {
             timestamp: new Date().toISOString(),

@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-// import { API_CONFIG } from '../../config';  // Temporarily disabled
+import { API_CONFIG } from '../../config';
 
 export interface AuthenticatedRequest extends Request {
     apiKey?: string;
@@ -9,12 +9,7 @@ export interface AuthenticatedRequest extends Request {
  * API Key authentication middleware.
  * If API_CONFIG.apiKey is empty, authentication is disabled.
  */
-export function authMiddleware(_req: AuthenticatedRequest, _res: Response, next: NextFunction): void {
-    // API_KEY authentication temporarily disabled
-    next();
-    return;
-
-    /* Original authentication code - temporarily disabled
+export function authMiddleware(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
     // If no apiKey configured, skip authentication
     if (!API_CONFIG.apiKey) {
         next();
@@ -22,7 +17,7 @@ export function authMiddleware(_req: AuthenticatedRequest, _res: Response, next:
     }
 
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader) {
         res.status(401).json({
             success: false,
@@ -49,7 +44,7 @@ export function authMiddleware(_req: AuthenticatedRequest, _res: Response, next:
     }
 
     const token = parts[1];
-    
+
     if (token !== API_CONFIG.apiKey) {
         res.status(401).json({
             success: false,
@@ -64,5 +59,4 @@ export function authMiddleware(_req: AuthenticatedRequest, _res: Response, next:
 
     req.apiKey = token;
     next();
-    */
 }

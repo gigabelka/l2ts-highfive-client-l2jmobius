@@ -1,6 +1,9 @@
 import { Router, type Request, type Response } from 'express';
 import { GameCommandManager } from '../../game/GameCommandManager';
 import { Logger } from '../../logger/Logger';
+import { getContainer } from '../../config/di';
+import { DI_TOKENS } from '../../config/di/Container';
+import type { GameState } from '../../game/GameState';
 const router = Router();
 
 /**
@@ -8,9 +11,26 @@ const router = Router();
  * Returns party information.
  */
 router.get('/', (req: Request, res: Response) => {
-    // TODO: Implement party repository in new architecture
-    // For now, return empty party state
-    const party = { inParty: false, isLeader: false, members: [] };
+    const container = getContainer();
+    const gameState = container.resolve<GameState>(DI_TOKENS.GameState).getOrThrow();
+
+    const party = {
+        inParty: gameState.party.length > 0,
+        isLeader: false, // TODO: Need to implement party leadership detection
+        members: gameState.party.map(member => ({
+            objectId: member.objectId,
+            name: member.name,
+            level: member.level,
+            classId: member.classId,
+            className: member.className,
+            hp: member.hp,
+            maxHp: member.maxHp,
+            mp: member.mp,
+            maxMp: member.maxMp,
+            cp: member.cp,
+            maxCp: member.maxCp
+        }))
+    };
 
     res.json({
         success: true,
@@ -80,8 +100,9 @@ router.post('/invite', (req: Request, res: Response) => {
  * Leave current party.
  */
 router.post('/leave', (req: Request, res: Response) => {
-    // TODO: Implement party repository in new architecture
-    const inParty = false; // Placeholder
+    const container = getContainer();
+    const gameState = container.resolve<GameState>(DI_TOKENS.GameState).getOrThrow();
+    const inParty = gameState.party.length > 0;
 
     if (!inParty) {
         res.status(400).json({

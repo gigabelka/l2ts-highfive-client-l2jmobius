@@ -128,16 +128,22 @@ export class GamePacketProcessor implements IPacketProcessor {
             if ('getData' in packet && typeof (packet as { getData?: unknown }).getData === 'function') {
                 packetData = (packet as { getData: () => unknown }).getData();
             } else {
-                // Если getData недоступен, используем сырые данные
-                packetData = { 
+                // Если getData недоступен, используем человекочитаемое описание
+                packetData = {
                     rawLength: data.length,
-                    rawHex: data.toString('hex').slice(0, 200)
+                    summary: `Unknown packet format (${data.length} bytes)`,
+                    preview: `Opcode: 0x${opcode.toString(16).padStart(2, '0')}, Data: [${data.slice(1, Math.min(9, data.length)).join(', ')}]${data.length > 9 ? '...' : ''}`,
+                    opcode: opcode,
+                    opcodeHex: `0x${opcode.toString(16).padStart(2, '0')}`
                 };
             }
         } catch (err) {
-            packetData = { 
+            packetData = {
                 rawLength: data.length,
-                rawHex: data.toString('hex').slice(0, 200),
+                summary: `Packet parse error (${data.length} bytes)`,
+                preview: `Opcode: 0x${opcode.toString(16).padStart(2, '0')}, Data: [${data.slice(1, Math.min(9, data.length)).join(', ')}]${data.length > 9 ? '...' : ''}`,
+                opcode: opcode,
+                opcodeHex: `0x${opcode.toString(16).padStart(2, '0')}`,
                 parseError: true,
                 errorMessage: err instanceof Error ? err.message : String(err)
             };

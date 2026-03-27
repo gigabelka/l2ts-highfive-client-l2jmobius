@@ -26,7 +26,6 @@ import type { GameState as GameStateType } from './game/GameState';
 
 // API
 import { ApiServer } from './api/ApiServer';
-import { WsServerNew } from './api/ws/WsServer';
 
 // UI
 // import { getDashboard, destroyDashboard } from './ui/Dashboard';
@@ -52,22 +51,13 @@ function initLogging(): void {
 /**
  * Инициализация API сервера
  */
-async function initApiServer(): Promise<{ api: ApiServer; ws: WsServerNew }> {
+async function initApiServer(): Promise<{ api: ApiServer }> {
     const apiServer = new ApiServer();
-    const wsServer = new WsServerNew();
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         apiServer.start(() => {
-            const httpServer = apiServer.getServer();
-            if (!httpServer) {
-                reject(new Error('Failed to start API server'));
-                return;
-            }
-
-            wsServer.start(httpServer);
-            Logger.info('Bootstrap', '✅ API Server and WebSocket are ready!');
-
-            resolve({ api: apiServer, ws: wsServer });
+            Logger.info('Bootstrap', '✅ API Server is ready!');
+            resolve({ api: apiServer });
         });
     });
 }
@@ -203,11 +193,10 @@ function onLoginComplete(session: SessionData): void {
 /**
  * Graceful shutdown
  */
-function shutdown(services: { api: ApiServer; ws: WsServerNew }): void {
+function shutdown(services: { api: ApiServer }): void {
     Logger.info('Shutdown', 'Shutting down gracefully...');
 
     services.api.stop();
-    services.ws.stop();
 
     // Останавливаем WebSocket API сервер
     if (wsApiServer) {

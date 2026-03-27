@@ -154,12 +154,55 @@ router.post('/use', (req: Request, res: Response) => {
  * Returns skill shortcuts (hotkeys).
  */
 router.get('/shortcuts', (req: Request, res: Response) => {
-    // TODO: Implement shortcuts storage in new architecture
-    // For now, return empty array
+    const character = getCharRepo().get();
+
+    // Basic shortcuts implementation - could be enhanced with persistent storage
+    let shortcuts: Array<{
+        slot: number;
+        type: 'skill' | 'item' | 'empty';
+        skillId?: number;
+        itemId?: number;
+        name?: string;
+        hotkey?: string;
+    }> = [];
+
+    if (character && character.skills) {
+        // Create some basic shortcuts for first few skills
+        const activeSkills = Array.from(character.skills)
+            .filter(skill => !skill.isPassive)
+            .slice(0, 12); // First 12 active skills
+
+        shortcuts = activeSkills.map((skill, index) => ({
+            slot: index + 1,
+            type: 'skill' as const,
+            skillId: skill.id,
+            name: skill.name || SkillDatabase.getSkillName(skill.id || 0) || `Skill #${skill.id}`,
+            hotkey: `F${Math.min(index + 1, 12)}` // F1-F12
+        }));
+
+        // Fill remaining slots as empty
+        for (let i = shortcuts.length; i < 12; i++) {
+            shortcuts.push({
+                slot: i + 1,
+                type: 'empty',
+                hotkey: `F${i + 1}`
+            });
+        }
+    } else {
+        // Return empty shortcuts when not in game
+        for (let i = 0; i < 12; i++) {
+            shortcuts.push({
+                slot: i + 1,
+                type: 'empty',
+                hotkey: `F${i + 1}`
+            });
+        }
+    }
+
     res.json({
         success: true,
         data: {
-            shortcuts: []
+            shortcuts
         },
         meta: {
             timestamp: new Date().toISOString(),

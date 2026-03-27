@@ -7,6 +7,7 @@ import { Router, type Request, type Response } from 'express';
 import { getContainer } from '../../config/di';
 import { DI_TOKENS } from '../../config/di/Container';
 import type { ICharacterRepository } from '../../domain/repositories';
+import type { GameState } from '../../game/GameState';
 
 const router = Router();
 
@@ -128,15 +129,33 @@ router.get('/buffs', (req: Request, res: Response) => {
         return;
     }
 
-    // TODO: Add buffs support to Character entity
+    // Get buffs from GameState
+    const gameState = container.resolve<GameState>(DI_TOKENS.GameState).getOrThrow();
+
     interface BuffInfo {
         id: number;
         name: string;
-        duration: number;
+        level: number;
         remainingTime: number;
     }
-    const buffs: BuffInfo[] = [];
-    const debuffs: BuffInfo[] = [];
+
+    const buffs: BuffInfo[] = gameState.effects
+        .filter(effect => effect.isBuff)
+        .map(effect => ({
+            id: effect.skillId,
+            name: effect.skillName,
+            level: effect.level,
+            remainingTime: effect.remainingSeconds
+        }));
+
+    const debuffs: BuffInfo[] = gameState.effects
+        .filter(effect => !effect.isBuff)
+        .map(effect => ({
+            id: effect.skillId,
+            name: effect.skillName,
+            level: effect.level,
+            remainingTime: effect.remainingSeconds
+        }));
 
     res.json({
         success: true,

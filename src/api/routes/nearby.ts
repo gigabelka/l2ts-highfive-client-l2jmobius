@@ -9,6 +9,7 @@ import { DI_TOKENS } from '../../config/di/Container';
 import type { ICharacterRepository, IWorldRepository } from '../../domain/repositories';
 import { NpcDatabase } from '../../data/NpcDatabase';
 import { GameCommandManager } from '../../game/GameCommandManager';
+import type { GameState } from '../../game/GameState';
 
 const router = Router();
 
@@ -171,14 +172,53 @@ router.get('/players', (req: Request, res: Response) => {
         return;
     }
 
-    // TODO: Implement players in IWorldRepository
+    // Get players from GameState
+    const gameState = container.resolve<GameState>(DI_TOKENS.GameState).getOrThrow();
+    const radius = Math.min(parseInt(req.query['radius'] as string) || 600, 2000);
+
     interface NearbyPlayerInfo {
         objectId: number;
         name: string;
+        title: string;
         level: number;
+        classId: number;
+        className: string;
         distance: number;
+        hp: number;
+        maxHp: number;
+        pvpFlag: boolean;
+        karma: number;
+        isInCombat: boolean;
+        isDead: boolean;
+        position: {
+            x: number;
+            y: number;
+            z: number;
+        };
     }
-    const players: NearbyPlayerInfo[] = []; // worldRepo.getNearbyPlayers?.(character.position, radius) || [];
+
+    const players: NearbyPlayerInfo[] = Array.from(gameState.players.values())
+        .filter(player => player.distanceToMe <= radius)
+        .map(player => ({
+            objectId: player.objectId,
+            name: player.name,
+            title: player.title,
+            level: 0, // Player level не доступен в интерфейсе Player
+            classId: player.classId,
+            className: player.className,
+            distance: player.distanceToMe,
+            hp: 0, // Player HP не доступен в интерфейсе Player
+            maxHp: 0,
+            pvpFlag: player.pvpFlag,
+            karma: player.karma,
+            isInCombat: player.isInCombat,
+            isDead: player.isDead,
+            position: {
+                x: player.x,
+                y: player.y,
+                z: player.z
+            }
+        }));
 
     res.json({
         success: true,

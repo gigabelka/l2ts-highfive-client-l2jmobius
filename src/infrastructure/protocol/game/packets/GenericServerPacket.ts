@@ -8,7 +8,9 @@ import type { IPacketReader, IIncomingPacket } from '../../../../application/por
 
 export interface GenericServerPacketData {
     rawLength: number;
-    rawHex: string;
+    summary: string;
+    preview: string;
+    opcodeHex: string;
     /** Первые int32 часто является objectId */
     objectId?: number;
 }
@@ -41,7 +43,9 @@ export class GenericServerPacket implements IIncomingPacket {
 
         this.data = {
             rawLength: buf.length,
-            rawHex: buf.toString('hex').slice(0, 200),
+            summary: `Generic packet (${buf.length} bytes)`,
+            preview: `Opcode: 0x${this.opcode.toString(16).padStart(2, '0')}, Data: [${payload.slice(0, Math.min(8, payload.length)).join(', ')}]${payload.length > 8 ? '...' : ''}`,
+            opcodeHex: `0x${this.opcode.toString(16).padStart(2, '0')}`,
             objectId,
         };
 
