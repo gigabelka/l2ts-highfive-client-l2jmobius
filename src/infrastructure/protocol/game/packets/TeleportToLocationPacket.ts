@@ -14,7 +14,7 @@ export interface TeleportToLocationData {
 }
 
 /**
- * Пакет TeleportToLocation (0x27)
+ * Пакет TeleportToLocation (0x38)
  * Уведомление о телепорте сущности
  * 
  * L2J Mobius CT0 Interlude format:
@@ -26,7 +26,7 @@ export interface TeleportToLocationData {
  * Total: 16 bytes
  */
 export class TeleportToLocationPacket implements IIncomingPacket {
-    readonly opcode = 0x27;
+    readonly opcode = 0x38;
     private data!: TeleportToLocationData;
 
     decode(reader: IPacketReader): this {

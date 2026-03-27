@@ -1,5 +1,5 @@
 /**
- * @fileoverview TeleportToLocationHandler - обработчик пакета TeleportToLocation (0x27)
+ * @fileoverview TeleportToLocationHandler - обработчик пакета TeleportToLocation (0x38)
  * @module infrastructure/protocol/game/handlers
  */
 
@@ -16,7 +16,7 @@ export class TeleportToLocationHandler extends BasePacketHandlerStrategy<Telepor
         private readonly characterRepo: ICharacterRepository,
         private readonly worldRepo: IWorldRepository
     ) {
-        super(0x27, eventBus);
+        super(0x38, eventBus);
     }
 
     protected canHandleInState(state: string): boolean {

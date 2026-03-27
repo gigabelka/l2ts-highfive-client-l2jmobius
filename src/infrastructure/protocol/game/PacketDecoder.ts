@@ -27,7 +27,7 @@ const OPCODE_MAP: Map<number, PacketDefinition> = new Map([
     // === Движение ===
     [0x01, { name: 'MoveToLocation', category: 'MOVEMENT', fields: ['objectId', 'targetX', 'targetY', 'targetZ', 'originX', 'originY', 'originZ'] }],
     [0x09, { name: 'StopMove', category: 'MOVEMENT', fields: ['objectId', 'x', 'y', 'z', 'heading'] }],
-    [0x27, { name: 'TeleportToLocation', category: 'MOVEMENT', fields: ['objectId', 'x', 'y', 'z'] }],
+    [0x27, { name: 'SocialAction', category: 'SYSTEM', fields: ['objectId', 'actionId'] }],
     [0x28, { name: 'ChangeMoveType', category: 'MOVEMENT', fields: ['objectId', 'isRunning'] }],
     [0x2E, { name: 'MoveToLocation', category: 'MOVEMENT', fields: ['objectId', 'targetX', 'targetY', 'targetZ', 'originX', 'originY', 'originZ'] }],
     [0x2F, { name: 'ChangeWaitType', category: 'MOVEMENT', fields: ['objectId', 'waitType'] }],

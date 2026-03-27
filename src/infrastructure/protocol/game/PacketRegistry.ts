@@ -201,7 +201,7 @@ const HANDLED_PACKETS: PacketConfig[] = [
         description: 'ItemList - полный список предметов',
     },
     {
-        opcode: 0x27,
+        opcode: 0x38,
         packetClass: TeleportToLocationPacket,
         handlerClass: TeleportToLocationHandler,
         repositories: ['character', 'world'],
@@ -291,7 +291,7 @@ const PARSED_PACKETS: PacketConfig[] = [
     { opcode: 0x28, packetClass: ChangeMoveTypePacket, description: 'ChangeMoveType - бег/ходьба' },
     { opcode: 0x29, packetClass: TargetSelectedPacket, description: 'TargetSelected - выбор цели (альт. опкод)' },
     { opcode: 0x2D, packetClass: SocialActionPacket, description: 'SocialAction - социальные действия (альт. опкод)' },
-    { opcode: 0x38, packetClass: TeleportToLocationPacket, description: 'TeleportToLocation - телепорт (альт. опкод)' },
+    { opcode: 0x27, packetClass: SocialActionPacket, description: 'SocialAction - социальные действия (L2J Interlude)' },
     { opcode: 0x3E, packetClass: ChangeMoveTypePacket, description: 'ChangeMoveType - бег/ходьба (альт. опкод)' },
     { opcode: 0x3F, packetClass: ValidateLocationPacket, description: 'ValidateLocation - валидация позиции' },
 
