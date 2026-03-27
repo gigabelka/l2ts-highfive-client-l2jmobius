@@ -7,9 +7,9 @@ import { CONFIG, isCurrentProtocolHighFive } from '../../../config';
  * CharacterSelect — select a character by slot index.
  *
  * OpCode: 0x0D for CT_0_Interlude (L2J Mobius specific + 14 bytes padding)
- *         0x12 for HighFive (L2J Mobius CT 2.6 - see ClientPackets.java)
+ *         0x12 for HighFive (L2J Mobius CT 2.6 + 14 bytes padding)
  *
- * Format: slot index (4 bytes, LE) + optional padding
+ * Format: slot index (4 bytes, LE) + 14 bytes padding (required for both protocols)
  */
 export class CharacterSelected implements OutgoingGamePacket {
     private slotIndex: number;
@@ -27,9 +27,9 @@ export class CharacterSelected implements OutgoingGamePacket {
         w.writeUInt8(opcode);
         w.writeInt32LE(this.slotIndex);  // slot index (4 bytes, LE)
 
-        // CT_0_Interlude requires 14 bytes padding, HighFive typically doesn't
-        if (CONFIG.Protocol === 746) {
-            // 14 bytes padding for CT_0_Interlude
+        // Both CT_0_Interlude and HighFive require 14 bytes padding based on working session analysis
+        if (CONFIG.Protocol === 746 || isCurrentProtocolHighFive()) {
+            // 14 bytes padding - required for both CT_0_Interlude and HighFive
             for (let i = 0; i < 14; i++) {
                 w.writeUInt8(0x00);
             }
