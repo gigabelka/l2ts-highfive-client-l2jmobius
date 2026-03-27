@@ -21,21 +21,23 @@ import {
     ChatMessageType,
 } from './entities/types';
 import { getClassName, getNpcName, getItemName } from './dictionaries';
+import { isCurrentProtocolHighFive } from '../config';
 
-// Опкоды пакетов Interlude (Protocol 746)
+// Опкоды пакетов (автоматически переключаются для HighFive)
+const isHF = isCurrentProtocolHighFive();
 const Opcodes = {
-    MOVE_TO_LOCATION: 0x2e,        // Используем 0x2E как в существующем MoveToLocationPacket
+    MOVE_TO_LOCATION: 0x01,        // L2J Mobius: 0x01 (вместо 0x2E)
     SPAWN_ITEM: 0x0b,
     DROP_ITEM: 0x0c,
     STATUS_UPDATE: 0x0e,
-    USER_INFO: 0x04,
-    CHAR_INFO: 0x03,
+    USER_INFO: isHF ? 0x32 : 0x04,
+    CHAR_INFO: isHF ? 0x31 : 0x03,
     NPC_INFO: 0x16,
     ITEM_LIST: 0x1b,
     INVENTORY_UPDATE: 0x19,
-    SKILL_LIST: 0x58,
+    SKILL_LIST: isHF ? 0x5f : 0x58,
     ATTACK: 0x05,
-    // Пакеты без существующих DTO - используем предполагаемую структуру
+    // Пакеты без существующих DTO
     DELETE_OBJECT: 0x08,
     DIE: 0x06,
     REVIVE: 0x07,

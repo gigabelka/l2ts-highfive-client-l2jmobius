@@ -209,8 +209,8 @@ export function createContainer(): Container {
                 next();
                 
                 // After handlers process the packet, update GameState
-                if (packet && 'opcode' in packet) {
-                    const opcode = (packet as { opcode: number }).opcode;
+                if (packet) {
+                    const opcode = context.opcode;
                     // Get parsed data from packet if available
                     const data = 'getData' in packet 
                         ? (packet as { getData: () => unknown }).getData() 

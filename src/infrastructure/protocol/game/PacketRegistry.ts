@@ -12,6 +12,7 @@
 import type { IEventBus, IPacketProcessor, IIncomingPacket } from '../../../application/ports';
 import type { ICharacterRepository, IWorldRepository, IInventoryRepository } from '../../../domain/repositories';
 import { GameIncomingPacketFactory } from './GameIncomingPacketFactory';
+import { isCurrentProtocolHighFive } from '../../../config';
 
 // =====================================================================
 // Packets с полным парсингом
@@ -107,7 +108,10 @@ interface PacketConfig {
 // NOTE: Opcodes configured for L2J Mobius CT_0_Interlude (protocol 746).
 // For HighFive (protocol 267), verification needed during testing.
 // =====================================================================
-const HANDLED_PACKETS: PacketConfig[] = [
+// =====================================================================
+const getHandledPackets = (): PacketConfig[] => {
+    const isHF = isCurrentProtocolHighFive();
+    return [
     // ---- MoveToLocation (0x01) — L2J Mobius opcode ----
     {
         opcode: 0x01,
@@ -117,18 +121,18 @@ const HANDLED_PACKETS: PacketConfig[] = [
         description: 'MoveToLocation - движение сущностей (L2J Mobius opcode)',
     },
     {
-        opcode: 0x03,
+        opcode: isHF ? 0x31 : 0x03,
         packetClass: CharInfoPacket,
         handlerClass: CharInfoHandler,
         repositories: ['world'],
-        description: 'CharInfo - информация о других игроках',
+        description: isHF ? 'CharInfo - информация о других игроках (HighFive)' : 'CharInfo - информация о других игроках',
     },
     {
-        opcode: 0x04,
+        opcode: isHF ? 0x32 : 0x04,
         packetClass: UserInfoPacket,
         handlerClass: UserInfoHandler,
         repositories: ['character'],
-        description: 'UserInfo - полная информация о персонаже',
+        description: isHF ? 'UserInfo - полная информация о персонаже (HighFive)' : 'UserInfo - полная информация о персонаже',
     },
     {
         opcode: 0x05,
@@ -237,11 +241,11 @@ const HANDLED_PACKETS: PacketConfig[] = [
         description: 'CreatureSay - сообщение в чате',
     },
     {
-        opcode: 0x58,
+        opcode: isHF ? 0x5F : 0x58,
         packetClass: SkillListPacket,
         handlerClass: SkillListHandler,
         repositories: ['character'],
-        description: 'SkillList - список скиллов',
+        description: isHF ? 'SkillList - список скиллов (HighFive)' : 'SkillList - список скиллов',
     },
     {
         opcode: 0x59,
@@ -272,6 +276,7 @@ const HANDLED_PACKETS: PacketConfig[] = [
         description: 'TargetUnselected - сброс цели',
     },
 ];
+};
 
 // =====================================================================
 // РАЗДЕЛ 2: Пакеты с парсерами, но без handlers
@@ -315,7 +320,9 @@ interface GenericPacketDef {
     description: string;
 }
 
-const GENERIC_PACKETS: GenericPacketDef[] = [
+const getGenericPackets = (): GenericPacketDef[] => {
+    const isHF = isCurrentProtocolHighFive();
+    const packets: GenericPacketDef[] = [
     // --- Авторизация / Лобби ---
     { opcode: 0x00, name: 'CryptInit', description: 'CryptInit - инициализация шифрования (handshake)' },
     { opcode: 0x0A, name: 'SunRise', description: 'SunRise - восход солнца' },
@@ -337,8 +344,8 @@ const GENERIC_PACKETS: GenericPacketDef[] = [
     { opcode: 0x2B, name: 'JoinParty', description: 'JoinParty - подтверждение группы' },
     { opcode: 0x2C, name: 'RestartResponse', description: 'RestartResponse / CharCreateOk' },
     { opcode: 0x30, name: 'MagicSkillCanceld', description: 'MagicSkillCanceld - отмена каста' },
-    { opcode: 0x31, name: 'EquipUpdate', description: 'EquipUpdate - обновление экипировки' },
-    { opcode: 0x32, name: 'EtcStatusUpdate', description: 'EtcStatusUpdate - обновление веса/штрафов' },
+    { opcode: 0x31, name: 'EquipUpdate', description: 'EquipUpdate - обновление экипировки (Interlude)' },
+    { opcode: 0x32, name: 'EtcStatusUpdate', description: 'EtcStatusUpdate - обновление веса/штрафов (Interlude)' },
     { opcode: 0x33, name: 'ShortBuffStatusUpdate', description: 'ShortBuffStatusUpdate - обновление коротких баффов' },
     { opcode: 0x34, name: 'MoveToLocationInVehicle', description: 'MoveToLocationInVehicle - движение в транспорте' },
     { opcode: 0x35, name: 'StopMoveInVehicle', description: 'StopMoveInVehicle - остановка в транспорте' },
@@ -458,10 +465,19 @@ const GENERIC_PACKETS: GenericPacketDef[] = [
     { opcode: 0xF9, name: 'ShowXMasSeal2', description: 'ShowXMasSeal - новогодний ивент (альт.)' },
 ];
 
-// =====================================================================
-// Объединённый реестр для совместимости
-// =====================================================================
-const PACKET_REGISTRY: PacketConfig[] = [...HANDLED_PACKETS, ...PARSED_PACKETS];
+    if (isHF) {
+        // For HighFive, remove opcodes that are now Handled (0x31, 0x32, 0x5F)
+        return packets.filter(p => p.opcode !== 0x31 && p.opcode !== 0x32 && p.opcode !== 0x5F);
+    }
+    return packets;
+};
+
+/**
+ * Объединённый реестр для совместимости
+ */
+function getFullRegistryList(): PacketConfig[] {
+    return [...getHandledPackets(), ...PARSED_PACKETS];
+}
 
 /**
  * Настроить фабрику пакетов
@@ -469,9 +485,10 @@ const PACKET_REGISTRY: PacketConfig[] = [...HANDLED_PACKETS, ...PARSED_PACKETS];
  */
 export function configurePacketFactory(factory?: GameIncomingPacketFactory): GameIncomingPacketFactory {
     const packetFactory = factory || new GameIncomingPacketFactory();
+    const registry = getFullRegistryList();
 
     // Раздел 1 + 2: Пакеты с полными классами
-    for (const config of PACKET_REGISTRY) {
+    for (const config of registry) {
         packetFactory.register(config.opcode, config.packetClass, {
             name: config.packetClass.name,
             description: config.description,
@@ -479,7 +496,7 @@ export function configurePacketFactory(factory?: GameIncomingPacketFactory): Gam
     }
 
     // Раздел 3: Generic пакеты (только распознавание по имени)
-    for (const def of GENERIC_PACKETS) {
+    for (const def of getGenericPackets()) {
         // Не перезаписываем уже зарегистрированные опкоды
         if (!packetFactory.supports(def.opcode)) {
             const GenericClass = createGenericPacketClass(def.opcode);
@@ -508,7 +525,8 @@ export function configurePacketProcessor(
         inventory: IInventoryRepository;
     }
 ): void {
-    for (const config of HANDLED_PACKETS) {
+    const handledPackets = getHandledPackets();
+    for (const config of handledPackets) {
         if (config.handlerClass && config.repositories) {
             const repos = config.repositories.map((name) => repositories[name]);
             const handler = new config.handlerClass(eventBus, ...repos);
@@ -533,8 +551,8 @@ export function configurePacketProcessor(
  */
 export function getRegisteredOpcodes(): number[] {
     const opcodes = new Set<number>();
-    for (const p of PACKET_REGISTRY) opcodes.add(p.opcode);
-    for (const p of GENERIC_PACKETS) opcodes.add(p.opcode);
+    for (const p of getFullRegistryList()) opcodes.add(p.opcode);
+    for (const p of getGenericPackets()) opcodes.add(p.opcode);
     return Array.from(opcodes).sort((a, b) => a - b);
 }
 
@@ -542,22 +560,24 @@ export function getRegisteredOpcodes(): number[] {
  * Проверить, поддерживается ли опкод
  */
 export function isOpcodeSupported(opcode: number): boolean {
-    return PACKET_REGISTRY.some((p) => p.opcode === opcode) ||
-           GENERIC_PACKETS.some((p) => p.opcode === opcode);
+    const registry = getFullRegistryList();
+    const genericPackets = getGenericPackets();
+    return registry.some((p) => p.opcode === opcode) ||
+           genericPackets.some((p) => p.opcode === opcode);
 }
 
 /**
  * Получить информацию о пакете по опкоду
  */
 export function getPacketInfo(opcode: number): PacketConfig | undefined {
-    return PACKET_REGISTRY.find((p) => p.opcode === opcode);
+    return getFullRegistryList().find((p) => p.opcode === opcode);
 }
 
 /**
  * Получить полный реестр
  */
 export function getFullRegistry(): ReadonlyArray<PacketConfig> {
-    return Object.freeze([...PACKET_REGISTRY]);
+    return Object.freeze(getFullRegistryList());
 }
 
 /**
@@ -565,8 +585,8 @@ export function getFullRegistry(): ReadonlyArray<PacketConfig> {
  */
 export function getRegisteredPacketCount(): number {
     const opcodes = new Set<number>();
-    for (const p of PACKET_REGISTRY) opcodes.add(p.opcode);
-    for (const p of GENERIC_PACKETS) opcodes.add(p.opcode);
+    for (const p of getFullRegistryList()) opcodes.add(p.opcode);
+    for (const p of getGenericPackets()) opcodes.add(p.opcode);
     return opcodes.size;
 }
 
@@ -574,5 +594,5 @@ export function getRegisteredPacketCount(): number {
  * Получить количество обработчиков
  */
 export function getHandlerCount(): number {
-    return HANDLED_PACKETS.filter((p) => p.handlerClass).length;
+    return getHandledPackets().filter((p) => p.handlerClass).length;
 }
