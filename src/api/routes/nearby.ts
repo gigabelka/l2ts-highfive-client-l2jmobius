@@ -306,18 +306,55 @@ router.post('/pickup', async (req: Request, res: Response) => {
         return;
     }
 
+    // Получаем репозитории для диагностики
+    const container = getContainer();
+    const charRepo = container.resolve<ICharacterRepository>(DI_TOKENS.CharacterRepository).getOrThrow();
+    const worldRepo = container.resolve<IWorldRepository>(DI_TOKENS.WorldRepository).getOrThrow();
+
+    // Диагностическое логирование перед попыткой pickup
+    const allItems = worldRepo.getAllItems();
+    console.log(`[NearbyRoute] WorldRepo items count: ${allItems.length}`);
+    console.log(`[NearbyRoute] Attempting pickup of item: ${objectId}`);
+
+    const char = charRepo.get();
+    if (char) {
+        const nearbyItems = worldRepo.getNearbyItems(char.position, 200);
+        console.log(`[NearbyRoute] Nearby items within 200m: ${nearbyItems.length}`);
+    }
+
     const success = await GameCommandManager.pickupItem(objectId);
 
     if (success) {
+        console.log(`[NearbyRoute] Successfully picked up item: ${objectId}`);
         res.json({
             success: true,
             data: { message: 'Pickup command sent', objectId },
             meta: { timestamp: new Date().toISOString(), requestId: req.requestId }
         });
     } else {
+        console.warn(`[NearbyRoute] Failed to pickup item: ${objectId}`);
+
+        // Собираем дополнительную диагностическую информацию для ошибки
+        const allItems = worldRepo.getAllItems();
+        let nearbyItemsCount = 0;
+
+        const char = charRepo.get();
+        if (char) {
+            nearbyItemsCount = worldRepo.getNearbyItems(char.position, 200).length;
+        }
+
         res.status(500).json({
             success: false,
-            error: { code: 'PICKUP_FAILED', message: 'Failed to pickup item' },
+            error: {
+                code: 'PICKUP_FAILED',
+                message: 'Failed to pickup item',
+                debug: {
+                    objectId,
+                    worldRepoItemsCount: allItems.length,
+                    nearbyItemsCount: nearbyItemsCount,
+                    characterPosition: char?.position || null
+                }
+            },
             meta: { timestamp: new Date().toISOString(), requestId: req.requestId }
         });
     }

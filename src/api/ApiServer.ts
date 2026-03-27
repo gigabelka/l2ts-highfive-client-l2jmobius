@@ -21,6 +21,7 @@ import chatRouter from './routes/chat';
 import partyRouter from './routes/party';
 import connectionRouter from './routes/connection';
 import socialRouter from './routes/social';
+import debugRouter from './routes/debug';
 
 
 export class ApiServer {
@@ -125,6 +126,7 @@ export class ApiServer {
         apiRouter.use('/party', partyRouter);
         apiRouter.use('/', connectionRouter);
         apiRouter.use('/social', socialRouter);
+        apiRouter.use('/debug', debugRouter);
 
         // Mount API v1
         this.app.use('/api/v1', apiRouter);

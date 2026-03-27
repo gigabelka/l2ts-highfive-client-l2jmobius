@@ -31,6 +31,8 @@ export class SpawnItemHandler extends BasePacketHandlerStrategy<SpawnItemPacket>
         const packet = new SpawnItemPacket().decode(reader);
         const data = packet.getData();
 
+        console.log(`[SpawnItemHandler] Spawning item: objectId=${data.objectId}, itemId=${data.itemId}, count=${data.count}, pos=(${data.x}, ${data.y}, ${data.z})`);
+
         // Создаем предмет в мире
         const { item, event } = WorldItem.spawn({
             objectId: data.objectId,
@@ -41,6 +43,8 @@ export class SpawnItemHandler extends BasePacketHandlerStrategy<SpawnItemPacket>
         });
 
         this.worldRepo.saveItem(item);
+        console.log(`[SpawnItemHandler] Item saved to worldRepo. Total items: ${this.worldRepo.getAllItems().length}`);
+
         this.eventBus.publish(event);
     }
 }

@@ -6,7 +6,7 @@
 
 Headless Lineage 2 клиент с **REST + WebSocket API** на TypeScript. Подключается к Login Server, аутентифицируется, выбирает персонажа и предоставляет API для управления и мониторинга.
 
-Целевой сервер: [L2J_Mobius CT_0_Interlude](https://gitlab.com/MobiusDevelopment/L2J_Mobius) (Protocol 746).
+Целевой сервер: [L2J_Mobius CT_2.6_HighFive](https://gitlab.com/MobiusDevelopment/L2J_Mobius/-/tree/master/L2J_Mobius_CT_2.6_HighFive?ref_type=heads) (Protocol 746).
 
 ---
 

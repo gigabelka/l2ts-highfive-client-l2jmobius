@@ -271,20 +271,35 @@ export class GameCommandManagerClass {
             return false;
         }
 
-        // Ищем предмет в мире
-        const item = this.deps.worldRepo.getItem(objectId);
-
-        if (!item) {
-            Logger.warn('GameCommandManager', `Item ${objectId} not found`);
-            return false;
-        }
-
-        // Проверяем расстояние до предмета
+        // Получаем персонажа для fallback поиска
         const char = this.deps.characterRepo.get();
         if (!char) {
             Logger.warn('GameCommandManager', 'Cannot pickup: character not found');
             return false;
         }
+
+        // Ищем предмет в мире
+        let item = this.deps.worldRepo.getItem(objectId);
+
+        if (!item) {
+            Logger.debug('GameCommandManager', `Item ${objectId} not found in worldRepo, searching nearby...`);
+            Logger.debug('GameCommandManager', `WorldRepo contains ${this.deps.worldRepo.getAllItems().length} items total`);
+
+            // FALLBACK: Ищем среди ближайших предметов
+            const nearbyItems = this.deps.worldRepo.getNearbyItems(char.position, 150);
+            item = nearbyItems.find(i => i.id === objectId);
+
+            if (!item) {
+                Logger.warn('GameCommandManager', `Item ${objectId} not found even in nearby items (${nearbyItems.length} items within 150m)`);
+                return false;
+            }
+
+            Logger.info('GameCommandManager', `Found item ${objectId} via nearby search (${nearbyItems.length} items in range)`);
+        } else {
+            Logger.debug('GameCommandManager', `Found item ${objectId} directly in worldRepo`);
+        }
+
+        // Проверяем расстояние до предмета
 
         const distance = char.position.distanceTo(item.position);
         if (distance > 150) {
