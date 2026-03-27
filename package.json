@@ -4,7 +4,7 @@
   "description": "Headless Lineage 2 HighFive client for L2J Mobius servers",
   "chronicle": "HighFive",
   "protocols": [
-    267
+    273
   ],
   "author": "Viktor Belkin",
   "license": "MIT",
