@@ -2,7 +2,7 @@ import { PacketWriter } from '../../../network/PacketWriter';
 import { Logger } from '../../../logger/Logger';
 import { OutgoingGamePacket } from './OutgoingGamePacket';
 import type { SessionData } from '../../../login/types';
-import { CONFIG } from '../../../config';
+import { isCurrentProtocolHighFive } from '../../../config';
 
 /**
  * AuthRequest — request to login to game server with session keys.
@@ -22,7 +22,7 @@ export class AuthRequest implements OutgoingGamePacket {
         const w = new PacketWriter();
 
         // 0x08 - AuthLogin opcode in CT_0_Interlude, 0x2B in HighFive
-        const opcode = CONFIG.Protocol === 267 ? 0x2B : 0x08;
+        const opcode = isCurrentProtocolHighFive() ? 0x2B : 0x08;
         w.writeUInt8(opcode);
 
         // Username in UTF-16LE null-terminated
@@ -38,12 +38,12 @@ export class AuthRequest implements OutgoingGamePacket {
 
         // Language / Unknown constant (usually 1) - only for CT_0_Interlude
         // HighFive protocol doesn't have this field
-        if (CONFIG.Protocol !== 267) {
+        if (!isCurrentProtocolHighFive()) {
             w.writeInt32LE(1);
         }
 
         const body = w.toBuffer();
-        const protocolName = CONFIG.Protocol === 267 ? 'HighFive' : 'CT0_Mobius';
+        const protocolName = isCurrentProtocolHighFive() ? 'HighFive' : 'CT0_Mobius';
         Logger.info('AuthRequest', `Sending keys (0x${opcode.toString(16)} ${protocolName}): play2=0x${(this.session.playOkId2 >>> 0).toString(16)}, play1=0x${(this.session.playOkId1 >>> 0).toString(16)}, login1=0x${(this.session.loginOkId1 >>> 0).toString(16)}, login2=0x${(this.session.loginOkId2 >>> 0).toString(16)}`);
         Logger.logPacket('SEND', opcode, body);
         Logger.debug('AuthRequest', `Encoded: opcode=0x${opcode.toString(16)}, bodyLen=${body.length}, username="${this.username}"`);

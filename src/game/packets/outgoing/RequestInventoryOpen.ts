@@ -10,12 +10,12 @@
 
 import { PacketWriter } from '../../../network/PacketWriter';
 import { OutgoingGamePacket } from './OutgoingGamePacket';
-import { CONFIG } from '../../../config';
+import { isCurrentProtocolHighFive } from '../../../config';
 
 export class RequestInventoryOpen implements OutgoingGamePacket {
     // CT_0_Interlude: 0x15, HighFive: 0x14
     public static get OPCODE(): number {
-        return CONFIG.Protocol === 267 ? 0x14 : 0x15;
+        return isCurrentProtocolHighFive() ? 0x14 : 0x15;
     }
 
     encode(): Buffer {

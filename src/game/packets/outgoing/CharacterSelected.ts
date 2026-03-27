@@ -1,7 +1,7 @@
 import { PacketWriter } from '../../../network/PacketWriter';
 import { Logger } from '../../../logger/Logger';
 import { OutgoingGamePacket } from './OutgoingGamePacket';
-import { CONFIG } from '../../../config';
+import { CONFIG, isCurrentProtocolHighFive } from '../../../config';
 
 /**
  * CharacterSelect — select a character by slot index.
@@ -23,7 +23,7 @@ export class CharacterSelected implements OutgoingGamePacket {
 
         // Use different opcodes for different protocol versions
         // CT_0_Interlude (746) uses 0x0D, HighFive (267) uses 0x12 (L2J Mobius CT 2.6)
-        const opcode = CONFIG.Protocol === 267 ? 0x12 : 0x0D;
+        const opcode = isCurrentProtocolHighFive() ? 0x12 : 0x0D;
         w.writeUInt8(opcode);
         w.writeInt32LE(this.slotIndex);  // slot index (4 bytes, LE)
 
@@ -36,7 +36,7 @@ export class CharacterSelected implements OutgoingGamePacket {
         }
 
         const body = w.toBuffer();
-        const protocolName = CONFIG.Protocol === 267 ? 'HighFive' : 'CT0_Interlude';
+        const protocolName = isCurrentProtocolHighFive() ? 'HighFive' : 'CT0_Interlude';
         Logger.logPacket('SEND', opcode, body);
         Logger.debug('CharacterSelected', `Encoded (${protocolName}): opcode=0x${opcode.toString(16)}, slot=${this.slotIndex}, bodyLen=${body.length}`);
         return body;

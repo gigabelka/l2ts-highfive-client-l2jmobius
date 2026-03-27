@@ -232,6 +232,27 @@ export const ServerId = SERVER_CONFIG.serverId;
 export const CharSlotIndex = SERVER_CONFIG.charSlotIndex;
 
 // =============================================================================
+// Protocol Helper Functions
+// =============================================================================
+
+/**
+ * Проверяет, является ли протокол HighFive
+ * HighFive протоколы: 267, 268, 271, 273 (L2J Mobius CT_2.6_HighFive)
+ * CT_0_Interlude протоколы: 746 и аналогичные
+ */
+export function isHighFiveProtocol(protocol: number): boolean {
+    const highFiveProtocols = [267, 268, 271, 273];
+    return highFiveProtocols.includes(protocol);
+}
+
+/**
+ * Проверяет, является ли текущий настроенный протокол HighFive
+ */
+export function isCurrentProtocolHighFive(): boolean {
+    return isHighFiveProtocol(SERVER_CONFIG.protocol);
+}
+
+// =============================================================================
 // WebSocket API Configuration
 // =============================================================================
 

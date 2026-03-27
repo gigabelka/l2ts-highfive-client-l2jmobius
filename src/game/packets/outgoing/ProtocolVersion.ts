@@ -1,7 +1,7 @@
 import { PacketWriter } from '../../../network/PacketWriter';
 import { Logger } from '../../../logger/Logger';
 import { OutgoingGamePacket } from './OutgoingGamePacket';
-import { CONFIG } from '../../../config';
+import { CONFIG, isCurrentProtocolHighFive } from '../../../config';
 
 /**
  * ProtocolVersion — first packet sent to game server.
@@ -17,7 +17,7 @@ export class ProtocolVersion implements OutgoingGamePacket {
 
         // Use different opcodes for different protocol versions
         // CT_0_Interlude (746) uses 0x00, HighFive (267) uses 0x0E
-        const opcode = CONFIG.Protocol === 267 ? 0x0E : 0x00;
+        const opcode = isCurrentProtocolHighFive() ? 0x0E : 0x00;
         w.writeUInt8(opcode);
 
         w.writeInt32LE(CONFIG.Protocol);  // Protocol version as INT32
@@ -33,7 +33,7 @@ export class ProtocolVersion implements OutgoingGamePacket {
 
         // Use different opcodes for different protocol versions
         // CT_0_Interlude (746) uses 0x00, HighFive (267) uses 0x0E
-        const opcode = CONFIG.Protocol === 267 ? 0x0E : 0x00;
+        const opcode = isCurrentProtocolHighFive() ? 0x0E : 0x00;
         w.writeUInt8(opcode);
 
         w.writeInt32LE(CONFIG.Protocol);  // Protocol version as INT32 (4 bytes!)

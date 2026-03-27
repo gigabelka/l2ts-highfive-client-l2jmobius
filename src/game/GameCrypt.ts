@@ -1,5 +1,5 @@
 import { Logger } from '../logger/Logger';
-import { CONFIG } from '../config';
+import { isCurrentProtocolHighFive } from '../config';
 
 /**
  * Game Server Cryptography
@@ -24,7 +24,7 @@ export class GameCrypt {
             throw new Error(`initKey: expected at least 8 bytes for XOR key, got ${key.length}`);
         }
 
-        this.isStandardCrypt = CONFIG.Protocol === 267;
+        this.isStandardCrypt = isCurrentProtocolHighFive();
 
         if (this.isStandardCrypt) {
             // Standard L2 Crypt: 16 bytes. First 8 from server, last 8 static
