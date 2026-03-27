@@ -27,6 +27,7 @@ import { CharacterSelected } from './packets/outgoing/CharacterSelected';
 import { AuthRequest } from './packets/outgoing/AuthRequest';
 import { RequestInventoryOpen } from './packets/outgoing/RequestInventoryOpen';
 import { RequestKeyMapping } from './packets/outgoing/RequestKeyMapping';
+import { EnterWorld } from './packets/outgoing/EnterWorld';
 import { OutgoingGamePacket } from './packets/outgoing/OutgoingGamePacket';
 
 // Services
@@ -314,10 +315,13 @@ export class GameClientNew implements IGameClient {
         this.state = GameClientState.WAIT_USER_INFO;
 
         if (isCurrentProtocolHighFive()) {
-            // HighFive: Send RequestKeyMapping (0xD0 0x21) instead of EnterWorld
-            // This is required for CT_2.6_HighFive protocol initialization
+            // HighFive: Send RequestKeyMapping (0xD0 0x21) as required
             Logger.info('GameClient', 'Sending HighFive RequestKeyMapping (0xD0 0x21)...');
             this.sendPacket(new RequestKeyMapping());
+            
+            // L2J Mobius explicitly requires EnterWorld (0x11) to trigger character spawn and UserInfo
+            Logger.info('GameClient', 'Sending HighFive EnterWorld (0x11)...');
+            this.sendPacket(new EnterWorld());
         } else {
             // CT_0_Interlude: Send special 3-packet sequence
             Logger.info('GameClient', 'Sending CT_0 EnterWorld sequence (0x9D + 0xD0 0x08 0x00 + 0x03)...');

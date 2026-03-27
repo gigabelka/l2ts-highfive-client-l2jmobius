@@ -1,7 +1,7 @@
 import { PacketWriter } from '../../../network/PacketWriter';
 import { Logger } from '../../../logger/Logger';
 import { OutgoingGamePacket } from './OutgoingGamePacket';
-import { CONFIG, isCurrentProtocolHighFive } from '../../../config';
+import { isCurrentProtocolHighFive } from '../../../config';
 
 /**
  * EnterWorld — request to enter game world.
@@ -9,7 +9,8 @@ import { CONFIG, isCurrentProtocolHighFive } from '../../../config';
  * OpCode: 0x03 for CT_0_Interlude (L2J Mobius specific with 104 bytes padding)
  *         0x11 for HighFive (standard L2 EnterWorld)
  *
- * Note: CT_0 requires special 3-packet sequence, handled in GameClient.
+ * Note: L2J Mobius explicitly expects exactly 104 bytes of padding payload
+ * for both CT_0_Interlude (746) and HighFive (267/273) to avoid BufferUnderflowException.
  */
 export class EnterWorld implements OutgoingGamePacket {
     encode(): Buffer {
@@ -20,12 +21,10 @@ export class EnterWorld implements OutgoingGamePacket {
         const opcode = isCurrentProtocolHighFive() ? 0x11 : 0x03;
         w.writeUInt8(opcode);
 
-        // CT_0_Interlude requires 104 bytes padding, HighFive typically doesn't
-        if (CONFIG.Protocol === 746) {
-            // 104 bytes padding for CT_0_Interlude
-            for (let i = 0; i < 104; i++) {
-                w.writeUInt8(0x00);
-            }
+        // Both CT_0_Interlude and HighFive in L2J Mobius require exactly 104 bytes padding
+        // This is used for hardware info/tracert parsing in the server
+        for (let i = 0; i < 104; i++) {
+            w.writeUInt8(0x00);
         }
 
         const body = w.toBuffer();
