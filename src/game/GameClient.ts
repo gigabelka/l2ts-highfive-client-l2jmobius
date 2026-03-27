@@ -26,7 +26,7 @@ import { ProtocolVersion } from './packets/outgoing/ProtocolVersion';
 import { CharacterSelected } from './packets/outgoing/CharacterSelected';
 import { AuthRequest } from './packets/outgoing/AuthRequest';
 import { RequestInventoryOpen } from './packets/outgoing/RequestInventoryOpen';
-import { EnterWorld } from './packets/outgoing/EnterWorld';
+import { RequestKeyMapping } from './packets/outgoing/RequestKeyMapping';
 import { OutgoingGamePacket } from './packets/outgoing/OutgoingGamePacket';
 
 // Services
@@ -314,9 +314,10 @@ export class GameClientNew implements IGameClient {
         this.state = GameClientState.WAIT_USER_INFO;
 
         if (isCurrentProtocolHighFive()) {
-            // HighFive: Send single standard EnterWorld packet (0x11)
-            Logger.info('GameClient', 'Sending HighFive EnterWorld (0x11)...');
-            this.sendPacket(new EnterWorld());
+            // HighFive: Send RequestKeyMapping (0xD0 0x21) instead of EnterWorld
+            // This is required for CT_2.6_HighFive protocol initialization
+            Logger.info('GameClient', 'Sending HighFive RequestKeyMapping (0xD0 0x21)...');
+            this.sendPacket(new RequestKeyMapping());
         } else {
             // CT_0_Interlude: Send special 3-packet sequence
             Logger.info('GameClient', 'Sending CT_0 EnterWorld sequence (0x9D + 0xD0 0x08 0x00 + 0x03)...');
