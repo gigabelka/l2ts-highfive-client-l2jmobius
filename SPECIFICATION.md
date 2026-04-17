@@ -103,8 +103,6 @@ while socket is open:
         process(pkt)
 ```
 
-Reference: [Connection.ts:239-258](src/network/Connection.ts#L239-L258).
-
 ---
 
 ## 3. Cryptography
@@ -118,8 +116,6 @@ Standard Blowfish in **ECB mode**, 16 Feistel rounds, 64-bit block, P-array of 1
 - **Block size:** 8 bytes. All login packets to be encrypted/decrypted are padded to a multiple of 8 bytes before encryption and are whole-number-of-8-blocks after decryption.
 - **Byte order inside a block:** Blowfish internally consumes two 32-bit halves. The L2 implementation uses **little-endian** `bytesTo32Bits`, which is the standard OpenSSL / Bouncy Castle convention for packet-based Blowfish.
 - **Key length:** 16 bytes (both the static login key and the session key returned in Init).
-
-Reference: [BlowfishEngine.ts](src/crypto/BlowfishEngine.ts).
 
 ### 3.2 NewCrypt XOR checksum (login phase, post-Init)
 
@@ -135,8 +131,6 @@ for i in 0, 4, 8, ..., size - 8:       # every DWORD except the last one
 ```
 
 The `size` MUST be a multiple of 4 and strictly greater than 4.
-
-Reference: [NewCrypt.ts:18-66](src/crypto/NewCrypt.ts#L18-L66).
 
 ### 3.3 NewCrypt rolling XOR (Init packet only)
 
@@ -158,8 +152,6 @@ while pos >= 4:
 # discard the last 8 bytes.
 ```
 
-Reference: [NewCrypt.ts:69-90](src/crypto/NewCrypt.ts#L69-L90), [LoginCrypt.ts:41-64](src/login/LoginCrypt.ts#L41-L64).
-
 ### 3.4 RSA-1024 for credential submission
 
 The server sends a scrambled 128-byte RSA public modulus inside the Init packet. The client unscrambles it, encrypts a 128-byte plaintext credential block with `RSA_NO_PADDING`, and sends the 128-byte ciphertext inside RequestAuthLogin.
@@ -179,8 +171,6 @@ The server sends a scrambled 128-byte RSA public modulus inside the Init packet.
 | `0x6C` | 2    | zeros (separator)                                                             |
 | `0x6E` | 16   | password, ASCII, null-padded                                                  |
 | `0x7E` | 2    | zeros                                                                         |
-
-Reference: [RSACrypt.ts:68-127](src/crypto/RSACrypt.ts#L68-L127).
 
 **Unscrambling the modulus.** The Init packet's 128-byte `scrambledRsaKey` must be unscrambled with this sequence of in-place operations (in exactly this order):
 
@@ -204,8 +194,6 @@ for i in 0..4:
 
 After that, `n` is the big-endian RSA modulus ready to be used with a standard RSA library.
 
-Reference: [ScrambledRSAKey.ts:24-40](src/crypto/ScrambledRSAKey.ts#L24-L40).
-
 ### 3.5 Login Blowfish keys
 
 **Static key** (used _only_ to decrypt the Init packet):
@@ -215,8 +203,6 @@ Reference: [ScrambledRSAKey.ts:24-40](src/crypto/ScrambledRSAKey.ts#L24-L40).
 ```
 
 **Session key** — 16 bytes received inside Init, at offset 153 of the body (after opcode+sessionId+protocolRev+scrambledRsaKey+16 reserved bytes). It is used for all login packets after Init, in both directions.
-
-Reference: [LoginCrypt.ts:12-31](src/login/LoginCrypt.ts#L12-L31).
 
 ### 3.6 Login packet encryption pipelines
 
@@ -250,8 +236,6 @@ body = opcode_byte + fields...              # raw, unencrypted
 # 5. Blowfish-ECB encrypt with SESSION_KEY
 # 6. prepend u16 LE length (encrypted_len + 2)
 ```
-
-Reference: [LoginCrypt.ts:84-111](src/login/LoginCrypt.ts#L84-L111).
 
 ### 3.7 Game XOR stream cipher
 
@@ -292,8 +276,6 @@ key[8..12] = u32_le_bytes(w)
 Both `key_cs` and `key_sc` evolve independently. If the two sides drift out of sync, subsequent packets will be garbage — the stream cipher has no framing recovery.
 
 **First packet rule (HighFive):** on HighFive the very first packet the server sends (CryptInit, §5.3.2) and the very first packet the client sends (ProtocolVersion, §5.3.1) are **plaintext** because the key has not yet been established. Whether packets after CryptInit are encrypted is controlled by CryptInit's `encryptionFlag`: if non-zero, all subsequent packets (starting with the client's AuthRequest) are XOR-encrypted; if zero, the entire session stays plaintext. L2J Mobius CT 2.6 HighFive sends `encryptionFlag = 0` — see §5.3.2.
-
-Reference: [GameCrypt.ts](src/game/GameCrypt.ts).
 
 ### 3.8 Test vectors
 
@@ -389,8 +371,6 @@ WAIT_PLAY_OK
 DONE  (disconnect from login server, move to §5)
 ```
 
-Reference: [types.ts](src/login/types.ts), [LoginClient.ts](src/login/LoginClient.ts).
-
 ### 4.2 Login Server opcode table
 
 | Opcode | Direction | Name               | Section |
@@ -424,8 +404,6 @@ Decrypted body (after Blowfish + reverse rolling XOR + dropping 8 trailing bytes
 | 169    | null terminator    | `u8`         | 1    | `0x00`                                   |
 
 Total payload: **170 bytes**.
-
-Reference: [InitPacket.ts](src/login/packets/incoming/InitPacket.ts).
 
 ### 4.4 LoginFail (S→C, opcode `0x01`)
 
@@ -489,8 +467,6 @@ Both tokens must be remembered — they are sent in RequestServerList, RequestSe
 
 The client selects the record whose `serverId` matches the configured `ServerId` and uses its `ip:port` for the Game Server connection.
 
-Reference: [ServerListPacket.ts](src/login/packets/incoming/ServerListPacket.ts).
-
 ### 4.7 PlayFail (S→C, opcode `0x06`)
 
 | Offset | Field    | Type          |
@@ -548,8 +524,6 @@ The fixed GG block (hex):
 
 The 128-byte RSA ciphertext is computed per §3.4 from the login, password, and the unscrambled modulus from Init.
 
-Reference: [RequestAuthLogin.ts](src/login/packets/outgoing/RequestAuthLogin.ts).
-
 ### 4.11 RequestServerLogin (C→S, opcode `0x02`)
 
 | Offset | Field        | Type          |
@@ -568,8 +542,6 @@ Reference: [RequestAuthLogin.ts](src/login/packets/outgoing/RequestAuthLogin.ts)
 | 5      | `loginOkId2` | `i32` | from LoginOk          |
 | 9      | `flags`      | `i32` | constant `0x04000000` |
 
-Reference: [RequestServerList.ts](src/login/packets/outgoing/RequestServerList.ts).
-
 ### 4.13 RequestGGAuth (C→S, opcode `0x07`)
 
 Body size: **40 bytes** (before padding/encryption).
@@ -583,8 +555,6 @@ Body size: **40 bytes** (before padding/encryption).
 | 13     | constant 3  | `i32`       | `0x000089AB` |
 | 17     | constant 4  | `i32`       | `0x0000CDEF` |
 | 21     | padding     | `bytes[19]` | zeros        |
-
-Reference: [RequestGGAuth.ts](src/login/packets/outgoing/RequestGGAuth.ts).
 
 ### 4.14 Annotated hex dumps
 
@@ -743,8 +713,6 @@ IN_GAME
 (disconnect) -> ERROR / DISCONNECTED
 ```
 
-Reference: [GameClientState.ts](src/game/GameClientState.ts), [GameClient.ts](src/game/GameClient.ts).
-
 ### 5.2 Framing and encryption
 
 - Packet framing is identical to the login server (§2.3): `u16 LE length` prefix that includes itself, followed by the body.
@@ -761,8 +729,6 @@ Every multi-byte field below is little-endian. Opcodes are the first byte of the
 | ------ | ---------- | ----- | ------ |
 | 0      | opcode     | `u8`  | `0x0E` |
 | 1      | `protocol` | `i32` | `273`  |
-
-Reference: [ProtocolVersion.ts](src/game/packets/outgoing/ProtocolVersion.ts).
 
 #### 5.3.2 CryptInit (S→C, opcode `0x2E`) — plaintext
 
@@ -782,8 +748,6 @@ After receiving CryptInit, the client builds `key_cs` and `key_sc` as `xorKey ||
 
 The reference client passes `encryptionFlag` directly into its crypt layer (`this.crypt.initKey(xorKeyData, useEncryption)` at [GameClient.ts:241](src/game/GameClient.ts#L241)), and the crypt layer's `encrypt`/`decrypt` methods short-circuit to the identity function when `enabled = false` ([GameCrypt.ts:64-67, 106-109](src/game/GameCrypt.ts#L64-L109)). In other words, a reimplementer is not required to special-case "encryption disabled" in the packet dispatcher — a no-op crypt object is the cleanest factoring.
 
-Reference: [GameClient.ts:205-250](src/game/GameClient.ts#L205-L250).
-
 #### 5.3.3 AuthRequest (C→S, opcode `0x2B`) — first packet after CryptInit (encrypted iff `CryptInit.encryptionFlag ≠ 0`)
 
 | Offset | Field        | Type  | Notes                            |
@@ -795,7 +759,7 @@ Reference: [GameClient.ts:205-250](src/game/GameClient.ts#L205-L250).
 | var+8  | `loginOkId1` | `i32` |                                  |
 | var+12 | `loginOkId2` | `i32` |                                  |
 
-**The field order `play2, play1, login1, login2` is mandatory** — getting it wrong silently breaks auth on L2J Mobius. Reference: [AuthRequest.ts:34-37](src/game/packets/outgoing/AuthRequest.ts#L34-L37).
+**The field order `play2, play1, login1, login2` is mandatory** — getting it wrong silently breaks auth on L2J Mobius.
 
 #### 5.3.4 CharSelectionInfo (S→C, opcode `0x09`)
 
@@ -817,13 +781,13 @@ Total body size: **19 bytes** (1 opcode + 4 `slotIndex` + 14 zero pad).
 | 1      | `slotIndex` | `i32`       | 0-based   |
 | 5      | padding     | `bytes[14]` | all zeros |
 
-**The 14 zero bytes are mandatory on L2J Mobius** — the server reads them and will disconnect otherwise. Reference: [CharacterSelected.ts](src/game/packets/outgoing/CharacterSelected.ts).
+**The 14 zero bytes are mandatory on L2J Mobius** — the server reads them and will disconnect otherwise.
 
 #### 5.3.6 CharSelected (S→C, opcode `0x0B`)
 
 Confirmation that the selected character was loaded. The body beyond the opcode is not required by the client; the presence of the opcode in state `WAIT_CHAR_SELECTED` triggers sending RequestKeyMapping and EnterWorld.
 
-**Important quirk:** some server builds skip CharSelected and send UserInfo (`0x32`) directly. The client must therefore also accept UserInfo while still in `WAIT_CHAR_SELECTED` and promote the state machine straight to IN_GAME. Reference: [GameClient.ts:184-197](src/game/GameClient.ts#L184-L197).
+**Important quirk:** some server builds skip CharSelected and send UserInfo (`0x32`) directly. The client must therefore also accept UserInfo while still in `WAIT_CHAR_SELECTED` and promote the state machine straight to IN_GAME.
 
 #### 5.3.7 RequestKeyMapping (C→S, extended opcode `0xD0 0x21`)
 
@@ -832,7 +796,7 @@ Confirmation that the selected character was loaded. The body beyond the opcode 
 | 0      | main opcode | `u8`  | `0xD0`   |
 | 1      | sub-opcode  | `u16` | `0x0021` |
 
-This is the canonical "extended packet" form used by L2 from Interlude onwards: a 1-byte primary opcode (`0xD0`) followed by a 2-byte LE sub-opcode. Reference: [RequestKeyMapping.ts](src/game/packets/outgoing/RequestKeyMapping.ts).
+This is the canonical "extended packet" form used by L2 from Interlude onwards: a 1-byte primary opcode (`0xD0`) followed by a 2-byte LE sub-opcode.
 
 #### 5.3.8 EnterWorld (C→S, opcode `0x11`)
 
@@ -843,7 +807,7 @@ Total body size: **105 bytes** (1 opcode + 104 zero pad).
 | 0      | opcode  | `u8`         | `0x11`    |
 | 1      | padding | `bytes[104]` | all zeros |
 
-**The 104 zero bytes are mandatory on L2J Mobius** — the server parses them as hardware info / traceroute blob and will throw `BufferUnderflowException` otherwise. Reference: [EnterWorld.ts](src/game/packets/outgoing/EnterWorld.ts).
+**The 104 zero bytes are mandatory on L2J Mobius** — the server parses them as hardware info / traceroute blob and will throw `BufferUnderflowException` otherwise.
 
 #### 5.3.9 UserInfo (S→C, opcode `0x32`)
 
@@ -894,8 +858,6 @@ The server periodically sends NetPingRequest; the client must answer promptly wi
 | 0      | opcode   | `u8`  | `0xA8`                   |
 | 1      | `pingId` | `i32` | echo from NetPingRequest |
 
-Reference: [GameClient.ts:301-306](src/game/GameClient.ts#L301-L306).
-
 A 13-byte variant also exists in the codebase ([NetPing.ts](src/game/packets/outgoing/NetPing.ts)), adding two trailing `i32` constants:
 
 | Offset | Field    | Type  | Value        |
@@ -924,11 +886,11 @@ These packets are not required to enter the world, but are included so that a re
 | `0x63`        | RequestQuestList                     | _(no body)_                                                                                                          |
 | `0xD0 0x0008` | EnterGameServer / RequestManorList   | _(no body; extended packet, see §5.3.7)_                                                                             |
 
-**Opcode `0x14` is overloaded C→S on HighFive.** Both `UseItem` (5-byte body: opcode + `i32 itemObjectId`) and `RequestItemList` / `RequestInventoryOpen` (1-byte body: opcode only) use the same opcode. The server disambiguates by the post-opcode body length — a 4-byte payload is a use-item request, an empty payload is an item-list request. On CT_0_Interlude the item-list opcode is `0x15` instead; for HighFive always use `0x14` with the appropriate body length. Reference: [UseItem.ts](src/game/packets/outgoing/UseItem.ts), [RequestInventoryOpen.ts](src/game/packets/outgoing/RequestInventoryOpen.ts).
+**Opcode `0x14` is overloaded C→S on HighFive.** Both `UseItem` (5-byte body: opcode + `i32 itemObjectId`) and `RequestItemList` / `RequestInventoryOpen` (1-byte body: opcode only) use the same opcode. The server disambiguates by the post-opcode body length — a 4-byte payload is a use-item request, an empty payload is an item-list request. On CT_0_Interlude the item-list opcode is `0x15` instead; for HighFive always use `0x14` with the appropriate body length.
 
-**Extended opcode `0xD0 0x0008` is overloaded C→S.** Both `EnterGameServer` and `RequestManorList` emit the same 3-byte body; the server interprets the packet according to the current session phase (handshake vs. in-game). A reimplementer does not usually need to send `EnterGameServer` at all — it exists in the reference implementation for CT_0-style flows. Reference: [EnterGameServer.ts](src/game/packets/outgoing/EnterGameServer.ts), [RequestManorList.ts](src/game/packets/outgoing/RequestManorList.ts).
+**Extended opcode `0xD0 0x0008` is overloaded C→S.** Both `EnterGameServer` and `RequestManorList` emit the same 3-byte body; the server interprets the packet according to the current session phase (handshake vs. in-game). A reimplementer does not usually need to send `EnterGameServer` at all — it exists in the reference implementation for CT_0-style flows.
 
-**RequestSocialAction action ids** (body is `i32`). Reference: [RequestSocialAction.ts:37-51](src/game/packets/outgoing/RequestSocialAction.ts#L37-L51).
+**RequestSocialAction action ids** (body is `i32`).
 
 | Id   | Action           |
 | ---- | ---------------- |
