@@ -229,7 +229,8 @@ assert newcrypt_checksum_ok(plain)          # last 4 bytes = XOR of all precedin
 body = opcode_byte + fields...              # raw, unencrypted
 # 1. pad to multiple of 4 with zeros
 # 2. append 8 zero bytes (4 reserved for checksum + 4 spare)
-# 3. pad to multiple of 8 with zeros
+# 3. pad to next multiple of 8 with zeros (adds 0 or 4 zero bytes, since
+#    after step 2 the buffer is already a multiple of 4)
 # 4. write checksum into the last 4 bytes of the *3-step-padded* buffer
 # 5. Blowfish-ECB encrypt with SESSION_KEY
 # 6. prepend u16 LE length (encrypted_len + 2)
@@ -410,7 +411,7 @@ Total payload: **170 bytes**.
 | 0      | opcode   | `u8` = `0x01` |
 | 1      | `reason` | `u8`          |
 
-Reason codes recognised by the reference client:
+Reason codes recognised by the reference client (all codes are hex):
 
 | Code   | Meaning                   |
 | ------ | ------------------------- |
@@ -921,7 +922,7 @@ The two opcodes a minimal client **must** handle after `IN_GAME`:
 - `0xD3` **NetPingRequest** — reply with NetPing (§5.4) or the server will drop the connection after ~60 seconds.
 - `0x32` **UserInfo** — sent periodically with updated player state; parse at least the leading fields described in §5.3.9 to keep the simulated world up to date.
 
-Everything else can be treated as opaque until the client chooses to decode a specific feature. The reference dispatcher at is the canonical template for a HighFive dispatcher.
+Everything else can be treated as opaque until the client chooses to decode a specific feature. The reference dispatcher in the reference implementation is the canonical template for a HighFive dispatcher.
 
 ---
 
@@ -1062,7 +1063,8 @@ key_cs = xorKey + staticTail        # 16 bytes
 key_sc = xorKey + staticTail
 # from now on, encrypt/decrypt with §3.7
 
-# AuthRequest (0x2B) — FIRST ENCRYPTED PACKET (on HighFive it IS encrypted)
+# AuthRequest (0x2B) — first post-CryptInit packet. Encrypted iff encryptionOn;
+# L2J Mobius HighFive sends encryptionFlag = 0, so this stays plaintext.
 nameUtf16 = utf16le(username) + bytes([0x00, 0x00])
 body = bytes([0x2B]) + nameUtf16
      + i32_le(playOkId2) + i32_le(playOkId1)    # SWAPPED ORDER!
