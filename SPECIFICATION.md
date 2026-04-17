@@ -277,7 +277,7 @@ key[8..12] = u32_le_bytes(w)
 
 Both `key_cs` and `key_sc` evolve independently. If the two sides drift out of sync, subsequent packets will be garbage — the stream cipher has no framing recovery.
 
-**First packet rule (HighFive):** on HighFive the very first packet the server sends (CryptInit, §5.3.2) and the very first packet the client sends (ProtocolVersion, §5.3.1) are **plaintext** because the key has not yet been established. Everything after that is encrypted — including the client's AuthRequest, which is the *first encrypted packet*.
+**First packet rule (HighFive):** on HighFive the very first packet the server sends (CryptInit, §5.3.2) and the very first packet the client sends (ProtocolVersion, §5.3.1) are **plaintext** because the key has not yet been established. Whether packets after CryptInit are encrypted is controlled by CryptInit's `encryptionFlag`: if non-zero, all subsequent packets (starting with the client's AuthRequest) are XOR-encrypted; if zero, the entire session stays plaintext. L2J Mobius CT 2.6 HighFive sends `encryptionFlag = 0` — see §5.3.2.
 
 Reference: [GameCrypt.ts](src/game/GameCrypt.ts).
 
@@ -577,9 +577,11 @@ Reference: [ProtocolVersion.ts](src/game/packets/outgoing/ProtocolVersion.ts).
 
 After receiving CryptInit, the client builds `key_cs` and `key_sc` as `xorKey || staticTail` (§3.7) and enables encryption according to `encryptionFlag`.
 
+**L2J Mobius CT 2.6 HighFive quirk:** the reference server sends `encryptionFlag = 0`, which disables the XOR stream cipher for the entire session — every subsequent packet (including AuthRequest) travels as plaintext. A correct client must honor this flag and only apply the XOR cipher when it is non-zero.
+
 Reference: [GameClient.ts:205-250](src/game/GameClient.ts#L205-L250).
 
-#### 5.3.3 AuthRequest (C→S, opcode `0x2B`) — first encrypted packet
+#### 5.3.3 AuthRequest (C→S, opcode `0x2B`) — first packet after CryptInit (encrypted iff `CryptInit.encryptionFlag ≠ 0`)
 
 | Offset | Field | Type | Notes |
 |--------|-------|------|-------|
@@ -700,7 +702,7 @@ These packets are not required to enter the world, but are included so that a re
 | `0x0A` | AttackRequest | `i32 objectId, i32 originX, i32 originY, i32 originZ, u8 shiftClick` |
 | `0x14` | UseItem | `i32 itemObjectId` |
 | `0x17` | DropItem | `i32 objectId, i32 count, i32 x, i32 y, i32 z` |
-| `0x1D` | ChangeWaitType2 | `u8 typeStand` (`0`=sit, `1`=stand) |
+| `0x1D` | ChangeWaitType2 | `i32 typeStand` (`0`=sit, `1`=stand) |
 | `0x29` | RequestJoinParty | `str playerName` |
 | `0x38` | Say2 | `str text, i32 chatType, [str target]` — the `target` field is present only when `chatType` = `24` (whisper) |
 | `0x39` | UseSkill | `i32 skillId, u8 ctrlPressed, u8 shiftPressed` |
