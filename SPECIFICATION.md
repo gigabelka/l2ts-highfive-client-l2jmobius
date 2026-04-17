@@ -5,7 +5,7 @@
 **Server flavor:** L2J Mobius (CT 2.6 HighFive)
 **Scope:** this document describes the complete wire protocol used between a game client and the two servers it talks to (the Login Server and the Game Server), plus the exact sequence of packets needed to automatically log in and enter the world as a character. It is language-agnostic and is intended to let another developer (or another LLM) re-implement a working client in any language.
 
-The reference implementation this spec was extracted from lives in [src/](src/) of this repository. File paths are cited only for cross-checking; the spec itself does not depend on any language feature or library beyond "raw TCP socket", "RSA (no padding)", and "Blowfish ECB".
+File paths are cited only for cross-checking; the spec itself does not depend on any language feature or library beyond "raw TCP socket", "RSA (no padding)", and "Blowfish ECB".
 
 ---
 
@@ -71,8 +71,6 @@ Notes on `str`:
 - An **empty string** encodes as just `00 00` (two bytes total).
 - A reader that encounters unterminated data must treat the packet as malformed.
 - Fields that precede a `str` are at fixed offsets; fields that follow one can only be located by first scanning forward for the `00 00` terminator. No length prefix is ever used for `str`.
-
-All types written by the reference implementation are in [src/network/PacketWriter.ts](src/network/PacketWriter.ts); all types read are in [src/network/PacketReader.ts](src/network/PacketReader.ts).
 
 ### 2.3 Packet framing
 
@@ -412,7 +410,7 @@ Total payload: **170 bytes**.
 | 0      | opcode   | `u8` = `0x01` |
 | 1      | `reason` | `u8`          |
 
-Reason codes recognised by the reference client ([LoginFailPacket.ts:19-32](src/login/packets/incoming/LoginFailPacket.ts#L19-L32)):
+Reason codes recognised by the reference client:
 
 | Code   | Meaning                   |
 | ------ | ------------------------- |
@@ -474,7 +472,7 @@ The client selects the record whose `serverId` matches the configured `ServerId`
 | 0      | opcode   | `u8` = `0x06` |
 | 1      | `reason` | `i32`         |
 
-Reason codes recognised by the reference client ([PlayFailPacket.ts:19-24](src/login/packets/incoming/PlayFailPacket.ts#L19-L24)):
+Reason codes recognised by the reference client:
 
 | Code   | Meaning                 |
 | ------ | ----------------------- |
@@ -746,7 +744,7 @@ After receiving CryptInit, the client builds `key_cs` and `key_sc` as `xorKey ||
 
 **L2J Mobius CT 2.6 HighFive quirk:** the reference server sends `encryptionFlag = 0`, which disables the XOR stream cipher for the entire session — every subsequent packet (including AuthRequest) travels as plaintext. A correct client must honor this flag and only apply the XOR cipher when it is non-zero.
 
-The reference client passes `encryptionFlag` directly into its crypt layer (`this.crypt.initKey(xorKeyData, useEncryption)` at [GameClient.ts:241](src/game/GameClient.ts#L241)), and the crypt layer's `encrypt`/`decrypt` methods short-circuit to the identity function when `enabled = false` ([GameCrypt.ts:64-67, 106-109](src/game/GameCrypt.ts#L64-L109)). In other words, a reimplementer is not required to special-case "encryption disabled" in the packet dispatcher — a no-op crypt object is the cleanest factoring.
+The reference client passes `encryptionFlag` directly into its crypt layer (`this.crypt.initKey(xorKeyData, useEncryption)`), and the crypt layer's `encrypt`/`decrypt` methods short-circuit to the identity function when `enabled = false`. In other words, a reimplementer is not required to special-case "encryption disabled" in the packet dispatcher — a no-op crypt object is the cleanest factoring.
 
 #### 5.3.3 AuthRequest (C→S, opcode `0x2B`) — first packet after CryptInit (encrypted iff `CryptInit.encryptionFlag ≠ 0`)
 
@@ -858,7 +856,7 @@ The server periodically sends NetPingRequest; the client must answer promptly wi
 | 0      | opcode   | `u8`  | `0xA8`                   |
 | 1      | `pingId` | `i32` | echo from NetPingRequest |
 
-A 13-byte variant also exists in the codebase ([NetPing.ts](src/game/packets/outgoing/NetPing.ts)), adding two trailing `i32` constants:
+A 13-byte variant also exists in the codebase, adding two trailing `i32` constants:
 
 | Offset | Field    | Type  | Value        |
 | ------ | -------- | ----- | ------------ |
@@ -923,7 +921,7 @@ The two opcodes a minimal client **must** handle after `IN_GAME`:
 - `0xD3` **NetPingRequest** — reply with NetPing (§5.4) or the server will drop the connection after ~60 seconds.
 - `0x32` **UserInfo** — sent periodically with updated player state; parse at least the leading fields described in §5.3.9 to keep the simulated world up to date.
 
-Everything else can be treated as opaque until the client chooses to decode a specific feature. The reference dispatcher at [GameClient.ts:180-310](src/game/GameClient.ts#L180-L310) is the canonical template for a HighFive dispatcher.
+Everything else can be treated as opaque until the client chooses to decode a specific feature. The reference dispatcher at is the canonical template for a HighFive dispatcher.
 
 ---
 
@@ -1117,7 +1115,7 @@ loop forever:
 | `serverId`  | `1..255`      | The numeric id of the desired Game Server inside the ServerList     |
 | `charSlot`  | `0..6`        | Which existing character to log in as (no auto-create is performed) |
 
-The reference implementation reads these from environment variables (`L2_USERNAME`, `L2_PASSWORD`, `L2_LOGIN_IP`, `L2_LOGIN_PORT`, `L2_PROTOCOL`, `L2_SERVER_ID`, `L2_CHAR_SLOT`) — see [src/config.ts:77-111](src/config.ts#L77-L111). A reimplementer can use any equivalent source.
+The reference implementation reads these from environment variables (`L2_USERNAME`, `L2_PASSWORD`, `L2_LOGIN_IP`, `L2_LOGIN_PORT`, `L2_PROTOCOL`, `L2_SERVER_ID`, `L2_CHAR_SLOT`). A reimplementer can use any equivalent source.
 
 ### 6.4 Error handling expected from a correct client
 
