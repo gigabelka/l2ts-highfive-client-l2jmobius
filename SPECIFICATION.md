@@ -50,19 +50,19 @@ The two exceptions are:
 
 ### 2.2 Primitive types
 
-| Name | Size | Notes |
-|------|------|-------|
-| `u8`  | 1 byte | unsigned |
-| `i8`  | 1 byte | signed |
-| `u16` | 2 bytes LE | unsigned |
-| `i16` | 2 bytes LE | signed |
-| `i32` | 4 bytes LE | signed |
-| `u32` | 4 bytes LE | unsigned |
-| `i64` | 8 bytes LE | signed |
-| `f32` | 4 bytes LE | IEEE-754 single |
-| `f64` | 8 bytes LE | IEEE-754 double |
-| `bytes[N]` | N bytes | raw, no length prefix |
-| `str` | UTF-16LE | variable, terminated by a `u16 0x0000` — see notes below |
+| Name       | Size       | Notes                                                    |
+| ---------- | ---------- | -------------------------------------------------------- |
+| `u8`       | 1 byte     | unsigned                                                 |
+| `i8`       | 1 byte     | signed                                                   |
+| `u16`      | 2 bytes LE | unsigned                                                 |
+| `i16`      | 2 bytes LE | signed                                                   |
+| `i32`      | 4 bytes LE | signed                                                   |
+| `u32`      | 4 bytes LE | unsigned                                                 |
+| `i64`      | 8 bytes LE | signed                                                   |
+| `f32`      | 4 bytes LE | IEEE-754 single                                          |
+| `f64`      | 8 bytes LE | IEEE-754 double                                          |
+| `bytes[N]` | N bytes    | raw, no length prefix                                    |
+| `str`      | UTF-16LE   | variable, terminated by a `u16 0x0000` — see notes below |
 
 Notes on `str`:
 
@@ -140,7 +140,7 @@ Reference: [NewCrypt.ts:18-66](src/crypto/NewCrypt.ts#L18-L66).
 
 ### 3.3 NewCrypt rolling XOR (Init packet only)
 
-The Init packet uses a rolling XOR applied *in addition to* the Blowfish decryption. The rolling XOR is a one-pass operation over the 4-byte DWORDs of the body, walked **from the end toward the beginning**, with a feedback loop:
+The Init packet uses a rolling XOR applied _in addition to_ the Blowfish decryption. The rolling XOR is a one-pass operation over the 4-byte DWORDs of the body, walked **from the end toward the beginning**, with a feedback loop:
 
 ```
 size = len(body)
@@ -172,13 +172,13 @@ The server sends a scrambled 128-byte RSA public modulus inside the Init packet.
 
 **Plaintext block layout (128 bytes):**
 
-| Offset | Size | Content |
-|--------|------|---------|
-| `0x00` | 94   | zeros |
+| Offset | Size | Content                                                                       |
+| ------ | ---- | ----------------------------------------------------------------------------- |
+| `0x00` | 94   | zeros                                                                         |
 | `0x5E` | 14   | login, ASCII, null-padded (no null terminator required, the padding is zeros) |
-| `0x6C` | 2    | zeros (separator) |
-| `0x6E` | 16   | password, ASCII, null-padded |
-| `0x7E` | 2    | zeros |
+| `0x6C` | 2    | zeros (separator)                                                             |
+| `0x6E` | 16   | password, ASCII, null-padded                                                  |
+| `0x7E` | 2    | zeros                                                                         |
 
 Reference: [RSACrypt.ts:68-127](src/crypto/RSACrypt.ts#L68-L127).
 
@@ -208,7 +208,7 @@ Reference: [ScrambledRSAKey.ts:24-40](src/crypto/ScrambledRSAKey.ts#L24-L40).
 
 ### 3.5 Login Blowfish keys
 
-**Static key** (used *only* to decrypt the Init packet):
+**Static key** (used _only_ to decrypt the Init packet):
 
 ```
 6B 60 CB 5B 82 CE 90 B1 CC 2B 6C 55 6C 6C 6C 6C
@@ -263,7 +263,7 @@ key_cs = serverKey[0..8] + staticTail     # client→server key
 key_sc = serverKey[0..8] + staticTail     # server→client key (same bytes, but evolves independently)
 ```
 
-**Encryption (client → server)** — XOR each byte with the key and the previous *output* byte:
+**Encryption (client → server)** — XOR each byte with the key and the previous _output_ byte:
 
 ```
 prev = 0
@@ -272,7 +272,7 @@ for i in 0..len(body):
     prev   = out[i]
 ```
 
-**Decryption (server → client)** — XOR each byte with the key and the previous *input* byte:
+**Decryption (server → client)** — XOR each byte with the key and the previous _input_ byte:
 
 ```
 prev = 0
@@ -393,19 +393,19 @@ Reference: [types.ts](src/login/types.ts), [LoginClient.ts](src/login/LoginClien
 
 ### 4.2 Login Server opcode table
 
-| Opcode | Direction | Name | Section |
-|--------|-----------|------|---------|
-| `0x00` | S→C | Init | §4.3 |
-| `0x01` | S→C | LoginFail | §4.4 |
-| `0x03` | S→C | LoginOk | §4.5 |
-| `0x04` | S→C | ServerList | §4.6 |
-| `0x06` | S→C | PlayFail | §4.7 |
-| `0x07` | S→C | PlayOk | §4.8 |
-| `0x0B` | S→C | GGAuth | §4.9 |
-| `0x00` | C→S | RequestAuthLogin | §4.10 |
-| `0x02` | C→S | RequestServerLogin | §4.11 |
-| `0x05` | C→S | RequestServerList | §4.12 |
-| `0x07` | C→S | RequestGGAuth | §4.13 |
+| Opcode | Direction | Name               | Section |
+| ------ | --------- | ------------------ | ------- |
+| `0x00` | S→C       | Init               | §4.3    |
+| `0x01` | S→C       | LoginFail          | §4.4    |
+| `0x03` | S→C       | LoginOk            | §4.5    |
+| `0x04` | S→C       | ServerList         | §4.6    |
+| `0x06` | S→C       | PlayFail           | §4.7    |
+| `0x07` | S→C       | PlayOk             | §4.8    |
+| `0x0B` | S→C       | GGAuth             | §4.9    |
+| `0x00` | C→S       | RequestAuthLogin   | §4.10   |
+| `0x02` | C→S       | RequestServerLogin | §4.11   |
+| `0x05` | C→S       | RequestServerList  | §4.12   |
+| `0x07` | C→S       | RequestGGAuth      | §4.13   |
 
 Note that opcodes are not globally unique: `0x00` and `0x07` exist in both directions with different semantics. Always disambiguate by direction.
 
@@ -413,15 +413,15 @@ Note that opcodes are not globally unique: `0x00` and `0x07` exist in both direc
 
 Decrypted body (after Blowfish + reverse rolling XOR + dropping 8 trailing bytes):
 
-| Offset | Field | Type | Size | Notes |
-|--------|-------|------|------|-------|
-| 0 | opcode | `u8` | 1 | `0x00` |
-| 1 | `sessionId` | `i32` | 4 | used by RequestGGAuth |
-| 5 | `protocolRevision` | `i32` | 4 | expected `0x0000C621` |
-| 9 | `scrambledRsaKey` | `bytes[128]` | 128 | must be unscrambled (§3.4) |
-| 137 | reserved | `bytes[16]` | 16 | four `i32`, ignored |
-| 153 | `blowfishKey` | `bytes[16]` | 16 | session key for subsequent login packets |
-| 169 | null terminator | `u8` | 1 | `0x00` |
+| Offset | Field              | Type         | Size | Notes                                    |
+| ------ | ------------------ | ------------ | ---- | ---------------------------------------- |
+| 0      | opcode             | `u8`         | 1    | `0x00`                                   |
+| 1      | `sessionId`        | `i32`        | 4    | used by RequestGGAuth                    |
+| 5      | `protocolRevision` | `i32`        | 4    | expected `0x0000C621`                    |
+| 9      | `scrambledRsaKey`  | `bytes[128]` | 128  | must be unscrambled (§3.4)               |
+| 137    | reserved           | `bytes[16]`  | 16   | four `i32`, ignored                      |
+| 153    | `blowfishKey`      | `bytes[16]`  | 16   | session key for subsequent login packets |
+| 169    | null terminator    | `u8`         | 1    | `0x00`                                   |
 
 Total payload: **170 bytes**.
 
@@ -429,63 +429,63 @@ Reference: [InitPacket.ts](src/login/packets/incoming/InitPacket.ts).
 
 ### 4.4 LoginFail (S→C, opcode `0x01`)
 
-| Offset | Field | Type |
-|--------|-------|------|
-| 0 | opcode | `u8` = `0x01` |
-| 1 | `reason` | `u8` |
+| Offset | Field    | Type          |
+| ------ | -------- | ------------- |
+| 0      | opcode   | `u8` = `0x01` |
+| 1      | `reason` | `u8`          |
 
 Reason codes recognised by the reference client ([LoginFailPacket.ts:19-32](src/login/packets/incoming/LoginFailPacket.ts#L19-L32)):
 
-| Code | Meaning |
-|------|---------|
-| `0x01` | System error |
-| `0x02` | Wrong password |
-| `0x03` | Wrong login or password |
-| `0x04` | Access denied |
-| `0x05` | Invalid account info |
+| Code   | Meaning                   |
+| ------ | ------------------------- |
+| `0x01` | System error              |
+| `0x02` | Wrong password            |
+| `0x03` | Wrong login or password   |
+| `0x04` | Access denied             |
+| `0x05` | Invalid account info      |
 | `0x06` | Access denied (try later) |
-| `0x07` | Account already in use |
-| `0x08` | Age restriction |
-| `0x09` | Server full |
-| `0x10` | Maintenance |
-| `0x11` | Temporary ban |
-| `0x23` | Dual box restriction |
+| `0x07` | Account already in use    |
+| `0x08` | Age restriction           |
+| `0x09` | Server full               |
+| `0x10` | Maintenance               |
+| `0x11` | Temporary ban             |
+| `0x23` | Dual box restriction      |
 
 Codes outside this set are logged as `Unknown reason (0x…)` and treated as fatal. On any LoginFail the client must close the connection.
 
 ### 4.5 LoginOk (S→C, opcode `0x03`)
 
-| Offset | Field | Type |
-|--------|-------|------|
-| 0 | opcode | `u8` = `0x03` |
-| 1 | `loginOkId1` | `i32` |
-| 5 | `loginOkId2` | `i32` |
+| Offset | Field        | Type          |
+| ------ | ------------ | ------------- |
+| 0      | opcode       | `u8` = `0x03` |
+| 1      | `loginOkId1` | `i32`         |
+| 5      | `loginOkId2` | `i32`         |
 
 Both tokens must be remembered — they are sent in RequestServerList, RequestServerLogin, and later in the game AuthRequest.
 
 ### 4.6 ServerList (S→C, opcode `0x04`)
 
-| Offset | Field | Type |
-|--------|-------|------|
-| 0 | opcode | `u8` = `0x04` |
-| 1 | `serverCount` | `u8` |
-| 2 | reserved | `u8` |
+| Offset   | Field             | Type                      |
+| -------- | ----------------- | ------------------------- |
+| 0        | opcode            | `u8` = `0x04`             |
+| 1        | `serverCount`     | `u8`                      |
+| 2        | reserved          | `u8`                      |
 | 3 + k·21 | server record `k` | see below (21 bytes each) |
 
 **Server record (21 bytes):**
 
-| Offset | Field | Type | Notes |
-|--------|-------|------|-------|
-| 0 | `serverId` | `u8` | |
-| 1 | `ip[0..4]` | `bytes[4]` | IPv4 as `a.b.c.d` (bytes are already in display order) |
-| 5 | `port` | `i32` | |
-| 9 | `ageLimit` | `u8` | |
-| 10 | `isPvp` | `u8` | `0`/`1` |
-| 11 | `onlinePlayers` | `u16` | |
-| 13 | `maxPlayers` | `u16` | |
-| 15 | `isOnline` | `u8` | `0`/`1` |
-| 16 | `flags` | `i32` | informational |
-| 20 | reserved | `u8` | |
+| Offset | Field           | Type       | Notes                                                  |
+| ------ | --------------- | ---------- | ------------------------------------------------------ |
+| 0      | `serverId`      | `u8`       |                                                        |
+| 1      | `ip[0..4]`      | `bytes[4]` | IPv4 as `a.b.c.d` (bytes are already in display order) |
+| 5      | `port`          | `i32`      |                                                        |
+| 9      | `ageLimit`      | `u8`       |                                                        |
+| 10     | `isPvp`         | `u8`       | `0`/`1`                                                |
+| 11     | `onlinePlayers` | `u16`      |                                                        |
+| 13     | `maxPlayers`    | `u16`      |                                                        |
+| 15     | `isOnline`      | `u8`       | `0`/`1`                                                |
+| 16     | `flags`         | `i32`      | informational                                          |
+| 20     | reserved        | `u8`       |                                                        |
 
 The client selects the record whose `serverId` matches the configured `ServerId` and uses its `ip:port` for the Game Server connection.
 
@@ -493,37 +493,37 @@ Reference: [ServerListPacket.ts](src/login/packets/incoming/ServerListPacket.ts)
 
 ### 4.7 PlayFail (S→C, opcode `0x06`)
 
-| Offset | Field | Type |
-|--------|-------|------|
-| 0 | opcode | `u8` = `0x06` |
-| 1 | `reason` | `i32` |
+| Offset | Field    | Type          |
+| ------ | -------- | ------------- |
+| 0      | opcode   | `u8` = `0x06` |
+| 1      | `reason` | `i32`         |
 
 Reason codes recognised by the reference client ([PlayFailPacket.ts:19-24](src/login/packets/incoming/PlayFailPacket.ts#L19-L24)):
 
-| Code | Meaning |
-|------|---------|
-| `0x03` | Password mismatch |
+| Code   | Meaning                 |
+| ------ | ----------------------- |
+| `0x03` | Password mismatch       |
 | `0x04` | Access error, try later |
-| `0x0F` | Too many players |
+| `0x0F` | Too many players        |
 
 Codes outside this set are logged as `Unknown reason (0x…)`. The legacy Interlude-era table (`0x01` = server full, `0x02` = server down, etc.) is **not** what L2J Mobius sends — a reimplementer must not hard-code it.
 
 ### 4.8 PlayOk (S→C, opcode `0x07`)
 
-| Offset | Field | Type |
-|--------|-------|------|
-| 0 | opcode | `u8` = `0x07` |
-| 1 | `playOkId1` | `i32` |
-| 5 | `playOkId2` | `i32` |
+| Offset | Field       | Type          |
+| ------ | ----------- | ------------- |
+| 0      | opcode      | `u8` = `0x07` |
+| 1      | `playOkId1` | `i32`         |
+| 5      | `playOkId2` | `i32`         |
 
 Both tokens must be remembered — they are sent later in the game AuthRequest.
 
 ### 4.9 GGAuth (S→C, opcode `0x0B`)
 
-| Offset | Field | Type |
-|--------|-------|------|
-| 0 | opcode | `u8` = `0x0B` |
-| 1 | `ggAuthResponse` | `i32` |
+| Offset | Field            | Type          |
+| ------ | ---------------- | ------------- |
+| 0      | opcode           | `u8` = `0x0B` |
+| 1      | `ggAuthResponse` | `i32`         |
 
 The client must remember `ggAuthResponse` and echo it inside RequestAuthLogin.
 
@@ -531,12 +531,12 @@ The client must remember `ggAuthResponse` and echo it inside RequestAuthLogin.
 
 Body size: **176 bytes** (before padding/encryption).
 
-| Offset | Field | Type | Size |
-|--------|-------|------|------|
-| 0 | opcode | `u8` | 1 |
-| 1 | RSA ciphertext | `bytes[128]` | 128 |
-| 129 | `ggAuthResponse` | `i32` | 4 |
-| 133 | fixed GG block | `bytes[43]` | 43 |
+| Offset | Field            | Type         | Size |
+| ------ | ---------------- | ------------ | ---- |
+| 0      | opcode           | `u8`         | 1    |
+| 1      | RSA ciphertext   | `bytes[128]` | 128  |
+| 129    | `ggAuthResponse` | `i32`        | 4    |
+| 133    | fixed GG block   | `bytes[43]`  | 43   |
 
 The fixed GG block (hex):
 
@@ -552,21 +552,21 @@ Reference: [RequestAuthLogin.ts](src/login/packets/outgoing/RequestAuthLogin.ts)
 
 ### 4.11 RequestServerLogin (C→S, opcode `0x02`)
 
-| Offset | Field | Type |
-|--------|-------|------|
-| 0 | opcode | `u8` = `0x02` |
-| 1 | `loginOkId1` | `i32` |
-| 5 | `loginOkId2` | `i32` |
-| 9 | `serverId` | `u8` |
+| Offset | Field        | Type          |
+| ------ | ------------ | ------------- |
+| 0      | opcode       | `u8` = `0x02` |
+| 1      | `loginOkId1` | `i32`         |
+| 5      | `loginOkId2` | `i32`         |
+| 9      | `serverId`   | `u8`          |
 
 ### 4.12 RequestServerList (C→S, opcode `0x05`)
 
-| Offset | Field | Type | Value |
-|--------|-------|------|-------|
-| 0 | opcode | `u8` | `0x05` |
-| 1 | `loginOkId1` | `i32` | from LoginOk |
-| 5 | `loginOkId2` | `i32` | from LoginOk |
-| 9 | `flags` | `i32` | constant `0x04000000` |
+| Offset | Field        | Type  | Value                 |
+| ------ | ------------ | ----- | --------------------- |
+| 0      | opcode       | `u8`  | `0x05`                |
+| 1      | `loginOkId1` | `i32` | from LoginOk          |
+| 5      | `loginOkId2` | `i32` | from LoginOk          |
+| 9      | `flags`      | `i32` | constant `0x04000000` |
 
 Reference: [RequestServerList.ts](src/login/packets/outgoing/RequestServerList.ts).
 
@@ -574,15 +574,15 @@ Reference: [RequestServerList.ts](src/login/packets/outgoing/RequestServerList.t
 
 Body size: **40 bytes** (before padding/encryption).
 
-| Offset | Field | Type | Value |
-|--------|-------|------|-------|
-| 0 | opcode | `u8` | `0x07` |
-| 1 | `sessionId` | `i32` | from Init |
-| 5 | constant 1 | `i32` | `0x00000123` |
-| 9 | constant 2 | `i32` | `0x00004567` |
-| 13 | constant 3 | `i32` | `0x000089AB` |
-| 17 | constant 4 | `i32` | `0x0000CDEF` |
-| 21 | padding | `bytes[19]` | zeros |
+| Offset | Field       | Type        | Value        |
+| ------ | ----------- | ----------- | ------------ |
+| 0      | opcode      | `u8`        | `0x07`       |
+| 1      | `sessionId` | `i32`       | from Init    |
+| 5      | constant 1  | `i32`       | `0x00000123` |
+| 9      | constant 2  | `i32`       | `0x00004567` |
+| 13     | constant 3  | `i32`       | `0x000089AB` |
+| 17     | constant 4  | `i32`       | `0x0000CDEF` |
+| 21     | padding     | `bytes[19]` | zeros        |
 
 Reference: [RequestGGAuth.ts](src/login/packets/outgoing/RequestGGAuth.ts).
 
@@ -753,14 +753,14 @@ Reference: [GameClientState.ts](src/game/GameClientState.ts), [GameClient.ts](sr
 
 ### 5.3 Handshake packets
 
-Every multi-byte field below is little-endian. Opcodes are the first byte of the *decrypted* body.
+Every multi-byte field below is little-endian. Opcodes are the first byte of the _decrypted_ body.
 
 #### 5.3.1 ProtocolVersion (C→S, opcode `0x0E`) — plaintext
 
-| Offset | Field | Type | Value |
-|--------|-------|------|-------|
-| 0 | opcode | `u8` | `0x0E` |
-| 1 | `protocol` | `i32` | `273` |
+| Offset | Field      | Type  | Value  |
+| ------ | ---------- | ----- | ------ |
+| 0      | opcode     | `u8`  | `0x0E` |
+| 1      | `protocol` | `i32` | `273`  |
 
 Reference: [ProtocolVersion.ts](src/game/packets/outgoing/ProtocolVersion.ts).
 
@@ -768,13 +768,13 @@ Reference: [ProtocolVersion.ts](src/game/packets/outgoing/ProtocolVersion.ts).
 
 23-byte packet (body, without the 2-byte length prefix):
 
-| Offset | Field | Type | Notes |
-|--------|-------|------|-------|
-| 0 | opcode | `u8` | `0x2E` |
-| 1 | `result` | `u8` | must be `1` for success; any other value is a rejection |
-| 2 | `xorKey` | `bytes[8]` | first 8 bytes of the stream cipher key |
-| 10 | `encryptionFlag` | `u32` | non-zero → encryption enabled for subsequent packets |
-| 14 | reserved | `bytes[9]` | ignored |
+| Offset | Field            | Type       | Notes                                                   |
+| ------ | ---------------- | ---------- | ------------------------------------------------------- |
+| 0      | opcode           | `u8`       | `0x2E`                                                  |
+| 1      | `result`         | `u8`       | must be `1` for success; any other value is a rejection |
+| 2      | `xorKey`         | `bytes[8]` | first 8 bytes of the stream cipher key                  |
+| 10     | `encryptionFlag` | `u32`      | non-zero → encryption enabled for subsequent packets    |
+| 14     | reserved         | `bytes[9]` | ignored                                                 |
 
 After receiving CryptInit, the client builds `key_cs` and `key_sc` as `xorKey || staticTail` (§3.7) and enables encryption according to `encryptionFlag`.
 
@@ -786,24 +786,24 @@ Reference: [GameClient.ts:205-250](src/game/GameClient.ts#L205-L250).
 
 #### 5.3.3 AuthRequest (C→S, opcode `0x2B`) — first packet after CryptInit (encrypted iff `CryptInit.encryptionFlag ≠ 0`)
 
-| Offset | Field | Type | Notes |
-|--------|-------|------|-------|
-| 0 | opcode | `u8` | `0x2B` |
-| 1 | `username` | `str` | UTF-16LE, 2-byte null terminator |
-| var | `playOkId2` | `i32` | **note the swapped order** |
-| var+4 | `playOkId1` | `i32` | |
-| var+8 | `loginOkId1` | `i32` | |
-| var+12 | `loginOkId2` | `i32` | |
+| Offset | Field        | Type  | Notes                            |
+| ------ | ------------ | ----- | -------------------------------- |
+| 0      | opcode       | `u8`  | `0x2B`                           |
+| 1      | `username`   | `str` | UTF-16LE, 2-byte null terminator |
+| var    | `playOkId2`  | `i32` | **note the swapped order**       |
+| var+4  | `playOkId1`  | `i32` |                                  |
+| var+8  | `loginOkId1` | `i32` |                                  |
+| var+12 | `loginOkId2` | `i32` |                                  |
 
 **The field order `play2, play1, login1, login2` is mandatory** — getting it wrong silently breaks auth on L2J Mobius. Reference: [AuthRequest.ts:34-37](src/game/packets/outgoing/AuthRequest.ts#L34-L37).
 
 #### 5.3.4 CharSelectionInfo (S→C, opcode `0x09`)
 
-| Offset | Field | Type |
-|--------|-------|------|
-| 0 | opcode | `u8` = `0x09` |
-| 1 | `charCount` | `u32` |
-| 5 | character records | variable |
+| Offset | Field             | Type          |
+| ------ | ----------------- | ------------- |
+| 0      | opcode            | `u8` = `0x09` |
+| 1      | `charCount`       | `u32`         |
+| 5      | character records | variable      |
 
 The auto-login algorithm does not need to parse character records; it simply picks `CONFIG.CharSlotIndex` (default `0`) and sends CharacterSelected. A reimplementer that wants to display the character list must parse each record: per-character data includes the character name (UTF-16LE string), character id (`i32`), access level (`i32`), class id (`i32`), last used flag, and a variable-length block with appearance, stats, and equipment. The layout is stable across L2J Mobius builds but is irrelevant for auto-entering the world, so its full decoding is out of scope here.
 
@@ -811,11 +811,11 @@ The auto-login algorithm does not need to parse character records; it simply pic
 
 Total body size: **19 bytes** (1 opcode + 4 `slotIndex` + 14 zero pad).
 
-| Offset | Field | Type | Value |
-|--------|-------|------|-------|
-| 0 | opcode | `u8` | `0x12` |
-| 1 | `slotIndex` | `i32` | 0-based |
-| 5 | padding | `bytes[14]` | all zeros |
+| Offset | Field       | Type        | Value     |
+| ------ | ----------- | ----------- | --------- |
+| 0      | opcode      | `u8`        | `0x12`    |
+| 1      | `slotIndex` | `i32`       | 0-based   |
+| 5      | padding     | `bytes[14]` | all zeros |
 
 **The 14 zero bytes are mandatory on L2J Mobius** — the server reads them and will disconnect otherwise. Reference: [CharacterSelected.ts](src/game/packets/outgoing/CharacterSelected.ts).
 
@@ -827,10 +827,10 @@ Confirmation that the selected character was loaded. The body beyond the opcode 
 
 #### 5.3.7 RequestKeyMapping (C→S, extended opcode `0xD0 0x21`)
 
-| Offset | Field | Type | Value |
-|--------|-------|------|-------|
-| 0 | main opcode | `u8` | `0xD0` |
-| 1 | sub-opcode | `u16` | `0x0021` |
+| Offset | Field       | Type  | Value    |
+| ------ | ----------- | ----- | -------- |
+| 0      | main opcode | `u8`  | `0xD0`   |
+| 1      | sub-opcode  | `u16` | `0x0021` |
 
 This is the canonical "extended packet" form used by L2 from Interlude onwards: a 1-byte primary opcode (`0xD0`) followed by a 2-byte LE sub-opcode. Reference: [RequestKeyMapping.ts](src/game/packets/outgoing/RequestKeyMapping.ts).
 
@@ -838,10 +838,10 @@ This is the canonical "extended packet" form used by L2 from Interlude onwards: 
 
 Total body size: **105 bytes** (1 opcode + 104 zero pad).
 
-| Offset | Field | Type | Value |
-|--------|-------|------|-------|
-| 0 | opcode | `u8` | `0x11` |
-| 1 | padding | `bytes[104]` | all zeros |
+| Offset | Field   | Type         | Value     |
+| ------ | ------- | ------------ | --------- |
+| 0      | opcode  | `u8`         | `0x11`    |
+| 1      | padding | `bytes[104]` | all zeros |
 
 **The 104 zero bytes are mandatory on L2J Mobius** — the server parses them as hardware info / traceroute blob and will throw `BufferUnderflowException` otherwise. Reference: [EnterWorld.ts](src/game/packets/outgoing/EnterWorld.ts).
 
@@ -851,26 +851,26 @@ Large packet containing the player's current state. The fields relevant for reac
 
 Initial fields (byte offsets within the decrypted body):
 
-| Offset | Field | Type | Notes |
-|--------|-------|------|-------|
-| 0 | opcode | `u8` = `0x32` | |
-| 1 | `x` | `i32` | spawn X |
-| 5 | `y` | `i32` | spawn Y |
-| 9 | `z` | `i32` | spawn Z |
-| 13 | `vehicleId` | `i32` | `0` if unmounted |
-| 17 | `objectId` | `i32` | unique id of the player's character in the world |
-| 21 | `name` | `str` | UTF-16LE + null terminator |
-| var | `race` | `i32` | |
-| var+4 | `sex` | `i32` | `0`=male, `1`=female |
-| var+8 | `classId` | `i32` | |
-| var+12 | `level` | `i32` | |
-| var+16 | `exp` | `i64` | |
-| ... | STR/DEX/CON/INT/WIT/MEN | `i32` × 6 | |
-| ... | `maxHp`, `curHp` | `i32` × 2 | |
-| ... | `maxMp`, `curMp` | `i32` × 2 | |
-| ... | `maxCp`, `curCp` | `i32` × 2 | |
-| ... | `sp` | `i32` | |
-| ... | `curLoad`, `maxLoad` | `i32` × 2 | |
+| Offset | Field                   | Type          | Notes                                            |
+| ------ | ----------------------- | ------------- | ------------------------------------------------ |
+| 0      | opcode                  | `u8` = `0x32` |                                                  |
+| 1      | `x`                     | `i32`         | spawn X                                          |
+| 5      | `y`                     | `i32`         | spawn Y                                          |
+| 9      | `z`                     | `i32`         | spawn Z                                          |
+| 13     | `vehicleId`             | `i32`         | `0` if unmounted                                 |
+| 17     | `objectId`              | `i32`         | unique id of the player's character in the world |
+| 21     | `name`                  | `str`         | UTF-16LE + null terminator                       |
+| var    | `race`                  | `i32`         |                                                  |
+| var+4  | `sex`                   | `i32`         | `0`=male, `1`=female                             |
+| var+8  | `classId`               | `i32`         |                                                  |
+| var+12 | `level`                 | `i32`         |                                                  |
+| var+16 | `exp`                   | `i64`         |                                                  |
+| ...    | STR/DEX/CON/INT/WIT/MEN | `i32` × 6     |                                                  |
+| ...    | `maxHp`, `curHp`        | `i32` × 2     |                                                  |
+| ...    | `maxMp`, `curMp`        | `i32` × 2     |                                                  |
+| ...    | `maxCp`, `curCp`        | `i32` × 2     |                                                  |
+| ...    | `sp`                    | `i32`         |                                                  |
+| ...    | `curLoad`, `maxLoad`    | `i32` × 2     |                                                  |
 
 The fields after `maxLoad` contain inventory paperdoll slots, abnormal effects, PvP info, etc. They are not needed for the auto-login to report "in game". A reimplementer can treat everything after the first `~24` fields as opaque until it chooses to parse specific features.
 
@@ -880,28 +880,28 @@ The server periodically sends NetPingRequest; the client must answer promptly wi
 
 #### 5.4.1 NetPingRequest (S→C, opcode `0xD3`)
 
-| Offset | Field | Type |
-|--------|-------|------|
-| 0 | opcode | `u8` = `0xD3` |
-| 1 | `pingId` | `i32` |
+| Offset | Field    | Type          |
+| ------ | -------- | ------------- |
+| 0      | opcode   | `u8` = `0xD3` |
+| 1      | `pingId` | `i32`         |
 
 #### 5.4.2 NetPing (C→S, opcode `0xA8`)
 
 **Observed on the wire: 5-byte body.** The reference client's live ping handler writes just the opcode and the echoed `pingId`:
 
-| Offset | Field | Type | Value |
-|--------|-------|------|-------|
-| 0 | opcode | `u8` | `0xA8` |
-| 1 | `pingId` | `i32` | echo from NetPingRequest |
+| Offset | Field    | Type  | Value                    |
+| ------ | -------- | ----- | ------------------------ |
+| 0      | opcode   | `u8`  | `0xA8`                   |
+| 1      | `pingId` | `i32` | echo from NetPingRequest |
 
 Reference: [GameClient.ts:301-306](src/game/GameClient.ts#L301-L306).
 
 A 13-byte variant also exists in the codebase ([NetPing.ts](src/game/packets/outgoing/NetPing.ts)), adding two trailing `i32` constants:
 
-| Offset | Field | Type | Value |
-|--------|-------|------|-------|
-| 5 | reserved | `i32` | `0x00000000` |
-| 9 | unknown | `i32` | `0x00080000` |
+| Offset | Field    | Type  | Value        |
+| ------ | -------- | ----- | ------------ |
+| 5      | reserved | `i32` | `0x00000000` |
+| 9      | unknown  | `i32` | `0x00080000` |
 
 The 13-byte class is not currently invoked at runtime; it is retained because packet captures from several official L2 clients show those trailing constants. A reimplementer should emit the **5-byte form** to match L2J Mobius, and may emit the 13-byte form when targeting more lenient servers. L2J Mobius accepts both, as long as the body begins with the opcode and a valid `pingId`.
 
@@ -909,20 +909,20 @@ The 13-byte class is not currently invoked at runtime; it is retained because pa
 
 These packets are not required to enter the world, but are included so that a reimplementer knows the pattern used for common commands. All are subject to the XOR cipher when §5.3.2's `encryptionFlag` is non-zero.
 
-| Opcode | Name | Body (beyond opcode) |
-|--------|------|----------------------|
-| `0x01` | MoveToLocation | `i32 targetX, i32 targetY, i32 targetZ, i32 originX, i32 originY, i32 originZ, i32 movementMode` (`1` = mouse click) |
-| `0x04` | Action | `i32 objectId, i32 originX, i32 originY, i32 originZ, u8 shiftClick` |
-| `0x0A` | AttackRequest | `i32 objectId, i32 originX, i32 originY, i32 originZ, u8 shiftClick` |
-| `0x14` | **UseItem** *or* **RequestItemList** | overloaded — see note below |
-| `0x17` | DropItem | `i32 objectId, i32 count, i32 x, i32 y, i32 z` |
-| `0x1B` | RequestSocialAction | `i32 actionId` — see action id table below |
-| `0x1D` | ChangeWaitType2 | `i32 typeStand` (`0`=sit, `1`=stand) |
-| `0x29` | RequestJoinParty | `str playerName` |
-| `0x38` | Say2 | `str text, i32 chatType, [str target]` — the `target` field is present only when `chatType` = `24` (whisper) |
-| `0x39` | UseSkill | `i32 skillId, u8 ctrlPressed, u8 shiftPressed` |
-| `0x63` | RequestQuestList | *(no body)* |
-| `0xD0 0x0008` | EnterGameServer / RequestManorList | *(no body; extended packet, see §5.3.7)* |
+| Opcode        | Name                                 | Body (beyond opcode)                                                                                                 |
+| ------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| `0x01`        | MoveToLocation                       | `i32 targetX, i32 targetY, i32 targetZ, i32 originX, i32 originY, i32 originZ, i32 movementMode` (`1` = mouse click) |
+| `0x04`        | Action                               | `i32 objectId, i32 originX, i32 originY, i32 originZ, u8 shiftClick`                                                 |
+| `0x0A`        | AttackRequest                        | `i32 objectId, i32 originX, i32 originY, i32 originZ, u8 shiftClick`                                                 |
+| `0x14`        | **UseItem** _or_ **RequestItemList** | overloaded — see note below                                                                                          |
+| `0x17`        | DropItem                             | `i32 objectId, i32 count, i32 x, i32 y, i32 z`                                                                       |
+| `0x1B`        | RequestSocialAction                  | `i32 actionId` — see action id table below                                                                           |
+| `0x1D`        | ChangeWaitType2                      | `i32 typeStand` (`0`=sit, `1`=stand)                                                                                 |
+| `0x29`        | RequestJoinParty                     | `str playerName`                                                                                                     |
+| `0x38`        | Say2                                 | `str text, i32 chatType, [str target]` — the `target` field is present only when `chatType` = `24` (whisper)         |
+| `0x39`        | UseSkill                             | `i32 skillId, u8 ctrlPressed, u8 shiftPressed`                                                                       |
+| `0x63`        | RequestQuestList                     | _(no body)_                                                                                                          |
+| `0xD0 0x0008` | EnterGameServer / RequestManorList   | _(no body; extended packet, see §5.3.7)_                                                                             |
 
 **Opcode `0x14` is overloaded C→S on HighFive.** Both `UseItem` (5-byte body: opcode + `i32 itemObjectId`) and `RequestItemList` / `RequestInventoryOpen` (1-byte body: opcode only) use the same opcode. The server disambiguates by the post-opcode body length — a 4-byte payload is a use-item request, an empty payload is an item-list request. On CT_0_Interlude the item-list opcode is `0x15` instead; for HighFive always use `0x14` with the appropriate body length. Reference: [UseItem.ts](src/game/packets/outgoing/UseItem.ts), [RequestInventoryOpen.ts](src/game/packets/outgoing/RequestInventoryOpen.ts).
 
@@ -930,21 +930,21 @@ These packets are not required to enter the world, but are included so that a re
 
 **RequestSocialAction action ids** (body is `i32`). Reference: [RequestSocialAction.ts:37-51](src/game/packets/outgoing/RequestSocialAction.ts#L37-L51).
 
-| Id | Action |
-|----|--------|
-| `1` | Stand/Sit toggle |
-| `2` | Greeting |
-| `3` | Victory |
-| `4` | Advance |
-| `5` | No |
-| `6` | Yes |
-| `7` | Bow |
-| `8` | Unaware |
-| `9` | Waiting |
-| `10` | Laugh |
-| `11` | Think |
-| `12` | Applaud |
-| `13` | Dance |
+| Id   | Action           |
+| ---- | ---------------- |
+| `1`  | Stand/Sit toggle |
+| `2`  | Greeting         |
+| `3`  | Victory          |
+| `4`  | Advance          |
+| `5`  | No               |
+| `6`  | Yes              |
+| `7`  | Bow              |
+| `8`  | Unaware          |
+| `9`  | Waiting          |
+| `10` | Laugh            |
+| `11` | Think            |
+| `12` | Applaud          |
+| `13` | Dance            |
 
 These suffice to implement movement, combat, inventory use, chat, skill casting, and basic social actions. Additional opcodes can be added incrementally — the L2J Mobius source is the authoritative reference for any packet not listed here.
 
@@ -1145,15 +1145,15 @@ loop forever:
 
 ### 6.3 Required configuration inputs
 
-| Input | Typical value | Notes |
-|-------|---------------|-------|
-| `username` | string | Login account (the reference client defaults to `qwerty`) |
-| `password` | string | Password (defaults to `qwerty`) |
-| `loginHost` | IPv4/DNS | Login Server address |
-| `loginPort` | `2106` | |
-| `protocol` | `273` | Must match a HighFive-compatible value (also `267`, `268`, `271`) |
-| `serverId` | `1..255` | The numeric id of the desired Game Server inside the ServerList |
-| `charSlot` | `0..6` | Which existing character to log in as (no auto-create is performed) |
+| Input       | Typical value | Notes                                                               |
+| ----------- | ------------- | ------------------------------------------------------------------- |
+| `username`  | string        | Login account (the reference client defaults to `qwerty`)           |
+| `password`  | string        | Password (defaults to `qwerty`)                                     |
+| `loginHost` | IPv4/DNS      | Login Server address                                                |
+| `loginPort` | `2106`        |                                                                     |
+| `protocol`  | `273`         | Must match a HighFive-compatible value (also `267`, `268`, `271`)   |
+| `serverId`  | `1..255`      | The numeric id of the desired Game Server inside the ServerList     |
+| `charSlot`  | `0..6`        | Which existing character to log in as (no auto-create is performed) |
 
 The reference implementation reads these from environment variables (`L2_USERNAME`, `L2_PASSWORD`, `L2_LOGIN_IP`, `L2_LOGIN_PORT`, `L2_PROTOCOL`, `L2_SERVER_ID`, `L2_CHAR_SLOT`) — see [src/config.ts:77-111](src/config.ts#L77-L111). A reimplementer can use any equivalent source.
 
@@ -1202,79 +1202,65 @@ Use this list when porting to a new language. Tick every box to have a working a
 
 ## 8. Constants appendix
 
-| Name | Value | Used in |
-|------|-------|---------|
-| Protocol version (HighFive) | `273` (also `267`, `268`, `271`) | ProtocolVersion (§5.3.1) |
-| Expected Init protocol revision | `0x0000C621` | Init (§4.3) |
-| Static login Blowfish key | `6B 60 CB 5B 82 CE 90 B1 CC 2B 6C 55 6C 6C 6C 6C` | Init decryption (§3.5) |
-| Static game XOR tail | `C8 27 93 01 A1 6C 31 97` | XOR key (§3.7) |
-| RequestServerList flags | `0x04000000` | §4.12 |
-| RequestGGAuth constants | `0x00000123`, `0x00004567`, `0x000089AB`, `0x0000CDEF` | §4.13 |
-| RequestAuthLogin fixed GG block | 43 bytes starting `23 01 00 00 67 45 00 00 AB 89 ...` | §4.10 |
-| RSA plaintext layout | 94 zero / 14 login / 2 zero / 16 password / 2 zero = 128 bytes | §3.4 |
-| RSA public exponent | `65537` (`0x10001`) | §3.4 |
-| CharacterSelected padding | 14 zero bytes after `slotIndex` | §5.3.5 |
-| EnterWorld padding | 104 zero bytes after opcode | §5.3.8 |
-| NetPing observed wire form | opcode + `i32 pingId` (5-byte body) | §5.4.2 |
-| NetPing legacy trailing constants | `0x00000000`, `0x00080000` (optional) | §5.4.2 |
-| Maximum packet length | `0xFFFF` (= 65 533-byte body) | §2.3 |
+| Name                              | Value                                                          | Used in                  |
+| --------------------------------- | -------------------------------------------------------------- | ------------------------ |
+| Protocol version (HighFive)       | `273` (also `267`, `268`, `271`)                               | ProtocolVersion (§5.3.1) |
+| Expected Init protocol revision   | `0x0000C621`                                                   | Init (§4.3)              |
+| Static login Blowfish key         | `6B 60 CB 5B 82 CE 90 B1 CC 2B 6C 55 6C 6C 6C 6C`              | Init decryption (§3.5)   |
+| Static game XOR tail              | `C8 27 93 01 A1 6C 31 97`                                      | XOR key (§3.7)           |
+| RequestServerList flags           | `0x04000000`                                                   | §4.12                    |
+| RequestGGAuth constants           | `0x00000123`, `0x00004567`, `0x000089AB`, `0x0000CDEF`         | §4.13                    |
+| RequestAuthLogin fixed GG block   | 43 bytes starting `23 01 00 00 67 45 00 00 AB 89 ...`          | §4.10                    |
+| RSA plaintext layout              | 94 zero / 14 login / 2 zero / 16 password / 2 zero = 128 bytes | §3.4                     |
+| RSA public exponent               | `65537` (`0x10001`)                                            | §3.4                     |
+| CharacterSelected padding         | 14 zero bytes after `slotIndex`                                | §5.3.5                   |
+| EnterWorld padding                | 104 zero bytes after opcode                                    | §5.3.8                   |
+| NetPing observed wire form        | opcode + `i32 pingId` (5-byte body)                            | §5.4.2                   |
+| NetPing legacy trailing constants | `0x00000000`, `0x00080000` (optional)                          | §5.4.2                   |
+| Maximum packet length             | `0xFFFF` (= 65 533-byte body)                                  | §2.3                     |
 
 **LoginFail reason codes** (§4.4):
 
-| Code | Meaning |
-|------|---------|
-| `0x01` | System error |
-| `0x02` | Wrong password |
-| `0x03` | Wrong login or password |
-| `0x04` | Access denied |
-| `0x05` | Invalid account info |
+| Code   | Meaning                   |
+| ------ | ------------------------- |
+| `0x01` | System error              |
+| `0x02` | Wrong password            |
+| `0x03` | Wrong login or password   |
+| `0x04` | Access denied             |
+| `0x05` | Invalid account info      |
 | `0x06` | Access denied (try later) |
-| `0x07` | Account already in use |
-| `0x08` | Age restriction |
-| `0x09` | Server full |
-| `0x10` | Maintenance |
-| `0x11` | Temporary ban |
-| `0x23` | Dual box restriction |
+| `0x07` | Account already in use    |
+| `0x08` | Age restriction           |
+| `0x09` | Server full               |
+| `0x10` | Maintenance               |
+| `0x11` | Temporary ban             |
+| `0x23` | Dual box restriction      |
 
 **PlayFail reason codes** (§4.7):
 
-| Code | Meaning |
-|------|---------|
-| `0x03` | Password mismatch |
+| Code   | Meaning                 |
+| ------ | ----------------------- |
+| `0x03` | Password mismatch       |
 | `0x04` | Access error, try later |
-| `0x0F` | Too many players |
+| `0x0F` | Too many players        |
 
 **RequestSocialAction action ids** (§5.5):
 
-| Id | Action | Id | Action |
-|----|--------|----|--------|
-| `1` | Stand/Sit | `8` | Unaware |
-| `2` | Greeting | `9` | Waiting |
-| `3` | Victory | `10` | Laugh |
-| `4` | Advance | `11` | Think |
-| `5` | No | `12` | Applaud |
-| `6` | Yes | `13` | Dance |
-| `7` | Bow |     |         |
+| Id  | Action    | Id   | Action  |
+| --- | --------- | ---- | ------- |
+| `1` | Stand/Sit | `8`  | Unaware |
+| `2` | Greeting  | `9`  | Waiting |
+| `3` | Victory   | `10` | Laugh   |
+| `4` | Advance   | `11` | Think   |
+| `5` | No        | `12` | Applaud |
+| `6` | Yes       | `13` | Dance   |
+| `7` | Bow       |      |         |
 
 **Overloaded C→S opcodes** (§5.5):
 
-| Opcode | First interpretation | Second interpretation | Disambiguation |
-|--------|----------------------|-----------------------|----------------|
-| `0x14` | UseItem (4-byte body) | RequestItemList (0-byte body) | Body length |
-| `0xD0 0x0008` | EnterGameServer | RequestManorList | Session phase |
+| Opcode        | First interpretation  | Second interpretation         | Disambiguation |
+| ------------- | --------------------- | ----------------------------- | -------------- |
+| `0x14`        | UseItem (4-byte body) | RequestItemList (0-byte body) | Body length    |
+| `0xD0 0x0008` | EnterGameServer       | RequestManorList              | Session phase  |
 
 ---
-
-## 9. Source cross-reference
-
-For cross-checking against the reference TypeScript implementation in this repository:
-
-- Framing: [src/network/Connection.ts](src/network/Connection.ts), [src/network/PacketReader.ts](src/network/PacketReader.ts), [src/network/PacketWriter.ts](src/network/PacketWriter.ts).
-- Crypto: [src/crypto/BlowfishEngine.ts](src/crypto/BlowfishEngine.ts), [src/crypto/NewCrypt.ts](src/crypto/NewCrypt.ts), [src/crypto/RSACrypt.ts](src/crypto/RSACrypt.ts), [src/crypto/ScrambledRSAKey.ts](src/crypto/ScrambledRSAKey.ts).
-- Login: [src/login/LoginCrypt.ts](src/login/LoginCrypt.ts), [src/login/LoginClient.ts](src/login/LoginClient.ts), [src/login/types.ts](src/login/types.ts), [src/login/packets/incoming/](src/login/packets/incoming/), [src/login/packets/outgoing/](src/login/packets/outgoing/).
-  - Reason-code tables: [LoginFailPacket.ts](src/login/packets/incoming/LoginFailPacket.ts), [PlayFailPacket.ts](src/login/packets/incoming/PlayFailPacket.ts).
-- Game: [src/game/GameCrypt.ts](src/game/GameCrypt.ts), [src/game/GameClient.ts](src/game/GameClient.ts), [src/game/GameClientState.ts](src/game/GameClientState.ts), [src/game/packets/outgoing/](src/game/packets/outgoing/).
-  - Overloaded and extended opcodes: [UseItem.ts](src/game/packets/outgoing/UseItem.ts), [RequestInventoryOpen.ts](src/game/packets/outgoing/RequestInventoryOpen.ts), [EnterGameServer.ts](src/game/packets/outgoing/EnterGameServer.ts), [RequestManorList.ts](src/game/packets/outgoing/RequestManorList.ts).
-  - Social actions: [RequestSocialAction.ts](src/game/packets/outgoing/RequestSocialAction.ts).
-  - Keepalive live handler: [GameClient.ts:301-306](src/game/GameClient.ts#L301-L306) (5-byte form) vs. [NetPing.ts](src/game/packets/outgoing/NetPing.ts) (13-byte class, currently unused).
-- Config: [src/config.ts](src/config.ts).
