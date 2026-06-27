@@ -98,7 +98,7 @@ The client uses FSM-driven clients for both connection phases:
 #### Phase 2: Game Server (GameClient)
 
 - **Flow:** ProtocolVersion (0x00) → CryptInit (0x00) → AuthRequest (0x08) → CharSelectInfo (0x13) → CharacterSelected (0x0D) → CharSelected (0x15) → (0x9D + 0xD0-08-00 + EnterWorld 0x03) → UserInfo (0x04) → IN_GAME (ping/pong)
-- **Crypto:** Encryption is disabled via flag sent in CryptInit (L2J Mobius CT0 specific)
+- **Crypto:** Game encryption is controlled by the CryptInit flag (`flag != 0` → 16-byte shifting XOR, `flag == 0` → pass-through). The client honors whatever the server sends; L2J Mobius CT_2.6_HighFive sends `flag = 0`, so the game stream is effectively unencrypted
 - **State Enum:** `GameState` (IDLE, CONNECTING, WAIT_CRYPT_INIT, WAIT_CHAR_LIST, WAIT_CHAR_SELECTED, WAIT_USER_INFO, IN_GAME, ERROR)
 
 ### Event-Driven Architecture
@@ -171,7 +171,7 @@ src/
 ## Key Implementation Details
 
 - **Packet framing:** Each L2 packet starts with uint16LE length (including the 2-byte header)
-- **Two crypto systems:** Login uses Blowfish ECB (NewCrypt → BlowfishEngine), Game uses XOR (GameCrypt, disabled for CT0)
+- **Two crypto systems:** Login uses Blowfish ECB (NewCrypt → BlowfishEngine), Game uses a flag-driven XOR (GameCrypt; applied only when the CryptInit flag is non-zero — L2J Mobius sends `flag = 0`, so it stays a pass-through)
 - **RSA encryption:** 1024-bit with NO_PADDING, modulus must be unscrambled first using ScrambledRSAKey
 - **Packet format types:** C=uint8, H=uint16, D=int32, Q=int64, F=double, S=UTF-16LE null-terminated string
 - **Game Server ProtocolVersion:** Uses opcode 0x00 (NOT 0x0B), confirmed from working Wireshark capture

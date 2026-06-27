@@ -6,6 +6,12 @@
 >
 > This prompt is deliberately self-contained: every opcode, byte layout, and crypto routine you
 > need is included inline. Do **not** invent values — use only what is written here.
+>
+> **Game-server encryption is flag-driven.** The 16-byte shifting XOR cipher below is applied
+> only when the CryptInit packet reports a non-zero encryption flag. L2J Mobius CT_2.6_HighFive
+> sends `flag = 0`, so on that server the game stream is effectively a pass-through (unencrypted).
+> Implement the cipher anyway and **honor whatever flag the server sends** — do not hard-code it
+> on or off.
 
 ---
 
@@ -15,8 +21,10 @@ You are a senior TypeScript network engineer. Build a small, headless **Lineage 
 that targets an **L2J Mobius CT_2.6_HighFive** server (protocol `267`).
 
 > **Scope of this prompt:** HighFive only. Do not implement the CT-0 / Interlude dialect. Every
-> opcode and crypto routine below is the HighFive variant. The game-server connection **uses
-> encryption** (a 16-byte shifting XOR — see below); it is **not** a plaintext connection.
+> opcode and crypto routine below is the HighFive variant. The game-server connection **may use
+> encryption** (a 16-byte shifting XOR — see below), depending on the CryptInit flag. On L2J
+> Mobius CT_2.6_HighFive the flag is `0`, so the stream is a pass-through; implement the cipher
+> but apply it only when the flag is non-zero.
 
 The program must, with **no human interaction**:
 
@@ -49,11 +57,13 @@ per file is fine. All code comments in English.
 5. **Extended packets:** opcodes `>= 0xD0` are written as `[0xD0][1-byte (or 2-byte) sub-opcode][...]`.
 6. **Use the opcodes from the OPCODE MAP below — never the "textbook" L2 opcodes.** This server is
    L2J Mobius CT_2.6_HighFive and uses its own opcode set, confirmed by packet captures.
-7. **Both connections use crypto.** Login Server: Blowfish ECB + RSA + XOR checksum. Game Server:
-   a **16-byte shifting XOR cipher that is ENABLED** for HighFive. The **first client→server game
-   packet (ProtocolVersion) is sent raw**, but **every game packet after CryptInit is encrypted**,
-   including the first packet you send after receiving CryptInit. Implement both correctly. (Do
-   **not** treat the game stream as plaintext — that only applies to the unsupported CT-0 dialect.)
+7. **Login uses crypto; game crypto is flag-driven.** Login Server: Blowfish ECB + RSA + XOR
+   checksum (always on). Game Server: a **16-byte shifting XOR cipher applied only when the
+   CryptInit flag is non-zero**. The **first client→server game packet (ProtocolVersion) is always
+   sent raw**. After CryptInit, read its encryption flag: if `flag != 0`, encrypt every sent body
+   and decrypt every received body (including the first packet you send afterwards, AuthRequest);
+   if `flag == 0` (the case on L2J Mobius CT_2.6_HighFive), the stream is a pass-through. Implement
+   the cipher correctly either way and honor the flag — never hard-code it.
 8. Never block the event loop. Use Node's `net` module with proper TCP stream reassembly.
 
 ---
@@ -556,12 +566,13 @@ export class LoginCrypt {
 ### `src/game/GameCrypt.ts` (game-server 16-byte shifting XOR — HighFive)
 
 ```typescript
-// HighFive game-server cipher. NOT plaintext. The key is 16 bytes:
+// HighFive game-server cipher. The key is 16 bytes:
 //   bytes 0..7  = the 8-byte XOR key from CryptInit
 //   bytes 8..15 = the fixed static tail below
-// Encryption is enabled as soon as CryptInit is processed. The very first game packet you SEND
-// after CryptInit (AuthRequest) IS encrypted. Decrypt/encrypt mutate a rolling carry and then
-// advance bytes 8..11 of the key by the packet size.
+// Encryption is enabled only when the CryptInit flag is non-zero. When enabled, the very first
+// game packet you SEND after CryptInit (AuthRequest) IS encrypted; when the flag is 0 (L2J Mobius
+// CT_2.6_HighFive) decrypt/encrypt are pass-throughs. Decrypt/encrypt mutate a rolling carry and
+// then advance bytes 8..11 of the key by the packet size.
 const STATIC_TAIL = Buffer.from([
   0xc8, 0x27, 0x93, 0x01, 0xa1, 0x6c, 0x31, 0x97,
 ]);
@@ -625,9 +636,10 @@ export class GameCrypt {
 ```
 
 > **Wiring:** on the game connection, after you decode CryptInit call `gameCrypt.init(xorKey, flag !== 0)`.
-> From then on: **decrypt every received game body** and **encrypt every sent game body** before the
-> 2-byte length prefix is added. ProtocolVersion is the only exception — it is sent raw, before
-> CryptInit exists.
+> From then on, if the cipher is enabled (`flag != 0`): **decrypt every received game body** and
+> **encrypt every sent game body** before the 2-byte length prefix is added. If `flag == 0` (L2J
+> Mobius CT_2.6_HighFive), `decrypt`/`encrypt` return the body unchanged. ProtocolVersion is always
+> sent raw — it precedes CryptInit.
 
 ### `src/debug/DebugTools.ts` (self-debug toolkit)
 
@@ -773,13 +785,14 @@ with `C reason` — log and stop.)
 **Carry into the game phases:** `loginOkId1`, `loginOkId2`, `playOkId1`, `playOkId2`, and the game
 server host/port. Then close the login connection.
 
-### PART B — GAME SERVER (encryption ENABLED — HighFive 16-byte shifting XOR)
+### PART B — GAME SERVER (flag-driven 16-byte shifting XOR)
 
 > Connect to the game host/port. **ProtocolVersion is sent raw.** After you receive CryptInit, call
-> `gameCrypt.init(xorKey, flag !== 0)` and from then on **decrypt every received body and encrypt
-> every sent body** (see `GameCrypt.ts`). For HighFive the flag is non-zero, so the cipher is on —
-> the connection is **not** plaintext, and the first packet you send afterwards (AuthRequest) is
-> encrypted.
+> `gameCrypt.init(xorKey, flag !== 0)`. From then on, **if the flag is non-zero** decrypt every
+> received body and encrypt every sent body (see `GameCrypt.ts`) — including the first packet you
+> send afterwards (AuthRequest). **On L2J Mobius CT_2.6_HighFive the flag is `0`**, so the cipher
+> stays a pass-through and bodies travel unencrypted. Honor whatever the server reports; never
+> hard-code it.
 
 Flow: `→ ProtocolVersion | CryptInit ← | → AuthRequest | CharSelectInfo ← | → CharacterSelected |
 CharSelected ← | → RequestKeyMapping + EnterWorld | UserInfo ← ⇒ IN_GAME | (loop) ping/pong`.
@@ -789,10 +802,12 @@ CharSelected ← | → RequestKeyMapping + EnterWorld | UserInfo ← ⇒ IN_GAME
 
 **CryptInit (← `0x2E`)** — first packet from server. `C 0x2E` + `C status` + `b[8] xorKey` +
 `D encryptionFlag` + rest. Read the 8-byte `xorKey` and the flag, then call
-`gameCrypt.init(xorKey, encryptionFlag !== 0)`. For HighFive the flag is non-zero ⇒ cipher enabled.
-This CryptInit packet body itself is **not** encrypted.
+`gameCrypt.init(xorKey, encryptionFlag !== 0)`. On L2J Mobius CT_2.6_HighFive the flag is `0` ⇒
+cipher stays a pass-through; a non-zero flag would enable it. This CryptInit packet body itself is
+always **not** encrypted.
 
-**AuthRequest (→ `0x2B`)** — order matters, and this packet **is encrypted**:
+**AuthRequest (→ `0x2B`)** — order matters; this packet is encrypted **iff the CryptInit flag was
+non-zero** (on L2J Mobius it is sent unencrypted):
 `C 0x2B` + `S username` + `D playOkId2` + `D playOkId1` + `D loginOkId1` + `D loginOkId2`.
 HighFive does **not** append a language field.
 
@@ -880,19 +895,20 @@ notes: <first failing assertion / error, if any>
 - **Objective:** authenticate at the game server and select the character.
 - **Inputs:** the 4 session ids + game host/port (Phase 2).
 - **Steps:** connect to the game server; send ProtocolVersion `0x0E` (raw); read CryptInit `0x2E`,
-  call `gameCrypt.init(xorKey, flag !== 0)` (cipher ON); send AuthRequest `0x2B` (encrypted); read
-  CharSelectInfo `0x09` (confirm `charCount >= 1`); send CharacterSelected `0x12`; read CharSelected
-  `0x0B` (tolerate it being skipped to UserInfo).
+  call `gameCrypt.init(xorKey, flag !== 0)` (cipher follows the flag — pass-through on L2J Mobius);
+  send AuthRequest `0x2B` (encrypted only if the flag was non-zero); read CharSelectInfo `0x09`
+  (confirm `charCount >= 1`); send CharacterSelected `0x12`; read CharSelected `0x0B` (tolerate it
+  being skipped to UserInfo).
 - **Self-debug:** `runCryptoSelfTests()` incl. game-XOR round-trip first; `[STATE]` path
-  WAIT_CRYPT_INIT → WAIT_CHAR_LIST → WAIT_CHAR_SELECTED; checklist `check('crypt enabled', ...)`,
-  `check('charCount >= 1', ...)`.
-- **Outputs:** an open, encrypted game connection in state WAIT_USER_INFO (+ the live `gameCrypt`).
+  WAIT_CRYPT_INIT → WAIT_CHAR_LIST → WAIT_CHAR_SELECTED; checklist
+  `check('crypt flag honored', ...)`, `check('charCount >= 1', ...)`.
+- **Outputs:** an open game connection in state WAIT_USER_INFO (+ the live `gameCrypt`).
 - **Done:** character selected (or UserInfo already arriving).
 
 ### PHASE 4 — Enter World & Keepalive
 
 - **Objective:** enter the world and stay connected.
-- **Inputs:** the encrypted game connection in WAIT_USER_INFO (Phase 3).
+- **Inputs:** the open game connection in WAIT_USER_INFO (Phase 3).
 - **Steps:** send RequestKeyMapping (`0xD0 0x0021`) then EnterWorld `0x11` + 104 zero bytes; on
   UserInfo `0x32` print **`IN_GAME`**; then answer every `0xD3` ping with a `0xA8` pong.
 - **Self-debug:** `[STATE]` path WAIT_USER_INFO → IN_GAME; checklist `check('IN_GAME printed', ...)`,
@@ -920,17 +936,21 @@ notes: <first failing assertion / error, if any>
 - **Wrong opcodes / nothing happens on the game server.** You used the textbook L2 opcodes. Use the
   HighFive OPCODE MAP exactly (ProtocolVersion `0x0E`, CryptInit `0x2E`, AuthRequest `0x2B`, …).
 - **AuthRequest rejected.** Key order is `playOkId2, playOkId1, loginOkId1, loginOkId2`. HighFive has
-  **no** trailing language field. Remember AuthRequest is **encrypted** (cipher is on after CryptInit).
+  **no** trailing language field. AuthRequest is encrypted only when the CryptInit flag was non-zero
+  (on L2J Mobius CT_2.6_HighFive the flag is `0`, so it is sent unencrypted like the rest).
 - **CharacterSelected ignored.** You must append exactly 14 zero bytes after the slot index.
 - **No UserInfo after EnterWorld / silent disconnect.** You forgot the 104 bytes of padding, or you
   skipped RequestKeyMapping. HighFive enter-world = RequestKeyMapping (`0xD0 0x0021`) then EnterWorld
   `0x11` + `b[104]` zeros.
-- **Game packets look scrambled / decode as garbage.** The game stream **is encrypted** (16-byte
-  shifting XOR). Make sure you called `gameCrypt.init(xorKey, flag !== 0)` after CryptInit and that
-  you **decrypt every received body and encrypt every sent body** (except the raw ProtocolVersion).
-  The static key tail is `c8 27 93 01 a1 6c 31 97`. Verify `decrypt(encrypt(x)) === x` first.
-- **First game packet after CryptInit rejected.** Unlike the CT-0 dialect, HighFive **encrypts** the
-  first client packet after CryptInit (AuthRequest) — do not send it raw.
+- **Game packets look scrambled / decode as garbage.** If the CryptInit flag was non-zero the game
+  stream **is encrypted** (16-byte shifting XOR): make sure you called
+  `gameCrypt.init(xorKey, flag !== 0)` after CryptInit and that you **decrypt every received body and
+  encrypt every sent body** (except the raw ProtocolVersion). The static key tail is
+  `c8 27 93 01 a1 6c 31 97`. Verify `decrypt(encrypt(x)) === x` first. If the flag was `0` (L2J
+  Mobius CT_2.6_HighFive) the bodies are already plaintext — do not XOR them.
+- **First game packet after CryptInit rejected.** Match the flag: when the cipher is enabled
+  (`flag != 0`) the first client packet (AuthRequest) **is encrypted** — do not send it raw; when
+  the flag is `0` it must be sent unencrypted like the rest of the stream.
 - **Connection closes after a minute.** You aren't answering pings. Reply to every `0xD3` with the
   13-byte `0xA8` pong.
 
