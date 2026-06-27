@@ -28,6 +28,7 @@ import { AuthRequest } from './packets/outgoing/AuthRequest';
 import { RequestInventoryOpen } from './packets/outgoing/RequestInventoryOpen';
 import { RequestKeyMapping } from './packets/outgoing/RequestKeyMapping';
 import { EnterWorld } from './packets/outgoing/EnterWorld';
+import { NetPing } from './packets/outgoing/NetPing';
 import { OutgoingGamePacket } from './packets/outgoing/OutgoingGamePacket';
 
 // Services
@@ -242,7 +243,7 @@ export class GameClientNew implements IGameClient {
 
                 Logger.info('GameClient', `Encryption: serverFlag=${serverEncryptionFlag}, protocol=${CONFIG.Protocol}, final=${useEncryption}`);
 
-                Logger.info('GameClient', 'Sending AuthLogin (0x08)...');
+                Logger.info('GameClient', 'Sending AuthRequest...');
                 this.sendPacket(new AuthRequest(this.session, CONFIG.Username));
 
                 Logger.logState(this.state, GameClientState.WAIT_CHAR_LIST);
@@ -298,11 +299,9 @@ export class GameClientNew implements IGameClient {
                 if (opcode === 0xD3 && this.state === GameClientState.IN_GAME) {
                     // NetPingRequest - respond with pong
                     // Packet structure: opcode (1) + pingId (4 bytes, int32LE)
+                    // Pong is a full 13-byte NetPing packet (0xA8 + pingId + 0 + 0x00080000)
                     const pingId = body.readInt32LE(1);
-                    const pong = Buffer.allocUnsafe(5);
-                    pong[0] = 0xA8;
-                    pong.writeInt32LE(pingId, 1);
-                    this.sendPacketRawBuffer(pong);
+                    this.sendPacket(new NetPing(pingId));
                     Logger.debug('GameClient', `pingId=${pingId} -> Pong`);
                     return;
                 }
